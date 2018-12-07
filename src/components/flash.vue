@@ -1,8 +1,9 @@
 <template>
   <div>
-    <i-button @click="show('showClass')">class me!</i-button>
-    <i-button @click="show('showMapper')">mapper me!</i-button>
-    <i-button @click="show('showService')">service me!</i-button>
+    <i-button @click="showAction('showClass')">class me!</i-button>
+    <i-button @click="showAction('showMapper')">mapper me!</i-button>
+    <i-button @click="showAction('showService')">service me!</i-button>
+    <i-button @click="showAction('showSetter')">setter me!</i-button>
 
 
     <span>{{msg}}</span>
@@ -65,22 +66,37 @@
 
     </div>
 
-    <div id="publicClass" v-if="showClass">
-      <div>
-        public class {{table.pascalName}} {
+    <div id="publicClass" v-if="show.showClass">
+      <div class="publicClass">
+        <div>
+          public class {{table.pascalName}} {
+        </div>
+        <div v-for="column in table.columns">
+          /** <br>
+          * {{column.description}}<br>
+          */<br>
+          <span> private {{column.dataType}} {{column.camelName}};</span>
+        </div>
+
+        <div>
+          }
+        </div>
       </div>
-      <div v-for="column in table.columns">
-        /** <br>
-        * {{column.description}}<br>
-        */<br>
-        <span> private {{column.dataType}} {{column.camelName}};</span>
-      </div>
-      <div>
+
+      <div class="publicClassQuery">
+        public class {{table.pascalName}}Query extends {{table.pascalName}} {
+        <br/>
+        <template v-for="column in table.columns">
+          <template v-if="column.dataType === 'String'">
+            private {{column.dataType}} like{{column.pascalName}};
+            <br/>
+          </template>
+        </template>
         }
       </div>
     </div>
 
-    <div id="publicMapper" v-if="showMapper">
+    <div id="publicMapper" v-if="show.showMapper">
       <div>public interface {{table.pascalName}}Mapper {</div>
       <div>
         <div class="querySql">
@@ -140,13 +156,14 @@
         <div class="baseQuery">
           @Select("{{_('script')}} select * from {{table.name}} where id = #{id} {{ _('/script')}}")
           <br>
-          {{table.pascalName}} get{{table.pascalName}}ById(@Param("{{table.primaryKey}}") {{table.primaryKeyType}} {{table.primaryKey}});
+          {{table.pascalName}} get{{table.pascalName}}ById(@Param("{{table.primaryKey}}") {{table.primaryKeyType}}
+          {{table.primaryKey}});
           <br>
           <br>
-          @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} in  " +
-          "    {{_("foreach collection='ids' index='index' item='item' open='(' close=')' separator=',' ")}} " +
-          "      #{item}  " +
-          "    {{_("/foreach")}}  {{ _('/script')}}") ")
+          @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} in " +
+          " {{_("foreach collection='ids' index='index' item='item' open='(' close=')' separator=',' ")}} " +
+          " #{item} " +
+          " {{_("/foreach")}} {{ _('/script')}}") ")
           <br>
           List<{{table.pascalName}}> get{{table.pascalName}}ByIds(@Param("ids") List<{{table.primaryKeyType}}> id);
         </div>
@@ -156,8 +173,81 @@
       <div>}</div>
     </div>
 
-    <div id="publicService" v-if="showService">
+    <div id="publicService" v-if="show.showService">
+      public class {{table.pascalName}}Service {
+      <br/>
+      @Autowired()
+      <br/>
+      private {{table.pascalName}}Mapper {{table.camelName}}Mapper;
+      <br/>
+      <br/>
+      <div class="add">
+        @Override
+        <br/>
+        public int add({{table.pascalName}} entity) {
+        <br/>
+        return {{table.camelName}}Mapper.insertSingle(entity);
+        <br/>
+        }
+      </div>
 
+      <div class="update">
+        @Override
+        <br/>
+        public int update({{table.pascalName}} entity) {
+        <br/>
+        return {{table.camelName}}Mapper.updateSingle(entity);
+        <br/>
+        }
+      </div>
+
+      <div class="delete">
+        @Override
+        <br/>
+        public int delete({{table.pascalName}} entity) {
+        <br/>
+        return {{table.camelName}}Mapper.deleteSingle(entity.{{table.primaryKey}});
+        <br/>
+        }
+      </div>
+
+      <div class="list">
+        @Override
+        <br/>
+        public List{{_(table.pascalName + "DTO")}} get{{table.pascalName}}List() {
+        <br/>
+        List{{_(table.pascalName + "DTO")}} {{table.camelName}}DTOS = new ArrayList<>();
+        <br/>
+
+        List{{_(table.pascalName)}} {{table.camelName}}s = districtMapper.get{{table.pascalName}}List();
+        <br/>
+
+        {{table.camelName}}s.forEach(entity -> {
+        <br/>
+
+        });
+        <br/>
+
+        return {{table.camelName}}DTOS;
+        <br/>
+
+        }
+      </div>
+
+      <br/>
+      }
+    </div>
+
+    <div id="setter" v-if="show.showSetter">
+      <Input v-model="setter.from" placeholder="from" style="width: 100px" size="small"/>
+      <Input v-model="setter.to" placeholder="to" style="width: 100px" size="small"/>
+      <br/>
+      <div class="setterContent">
+        <template v-for="column in table.columns">
+          {{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());
+          <br/>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -173,27 +263,31 @@
         visible: false,
         msg: '',
         table: '',
-        showClass: false,
-        showMapper: false,
-        showService: false,
-      }
+        show: {
+          showClass: false,
+          showMapper: false,
+          showService: false,
+          showSetter: false
+        },
+        setter: {
+          from: 'from',
+          to: 'to',
+        }
+      };
     },
     methods: {
       _(value) {
         return "<" + value + ">";
       },
-      show: function (data) {
+      showAction: function (data) {
         this.table = dataConvert.getTable(this.$refs.create_table_script.innerText);
 
-        this.showClass = false;
-        this.showMapper = false;
-        this.showService = false;
-        if (data === 'showClass') {
-          this.showClass = true;
-        } else if (data === 'showMapper') {
-          this.showMapper = true;
-        } else if (data === 'showSerivce') {
-          this.showSerivce = true;
+        for (let property in this.show) {
+          if (data === property) {
+            this.show[property] = true;
+          } else {
+            this.show[property] = false;
+          }
         }
       }
     }
@@ -222,5 +316,12 @@
 
   #create_table_script {
     display: none;
+  }
+
+  #setter {
+    margin: 10px;
+  }
+  .setterContent{
+    margin-top: 10px;
   }
 </style>
