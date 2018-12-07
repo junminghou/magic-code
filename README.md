@@ -1,6 +1,6 @@
 # magic-code
 
-> A Vue.js project
+> 根据数据库脚本生成自己需要的代码，可以自定义魔板
 
 ## Build Setup
 
