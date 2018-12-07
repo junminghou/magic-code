@@ -247,6 +247,11 @@
           {{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());
           <br/>
         </template>
+        <br/>
+        <template v-for="column in table.columns">
+          {{setter.to}}.set{{column.pascalName}}({{column.camelName}});
+          <br/>
+        </template>
       </div>
     </div>
   </div>
