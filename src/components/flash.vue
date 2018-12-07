@@ -174,6 +174,9 @@
     </div>
 
     <div id="publicService" v-if="show.showService">
+      <Input v-model="magic.magicReturn" placeholder="magicReturn" style="width: 100px" size="small"
+             class="setterContent"/>
+      <br/>
       public class {{table.pascalName}}Service {
       <br/>
       @Autowired()
@@ -184,7 +187,7 @@
       <div class="add">
         @Override
         <br/>
-        public int add({{table.pascalName}} entity) {
+        public {{magicReturn('int')}} add({{table.pascalName}} entity) {
         <br/>
         return {{table.camelName}}Mapper.insertSingle(entity);
         <br/>
@@ -194,7 +197,7 @@
       <div class="update">
         @Override
         <br/>
-        public int update({{table.pascalName}} entity) {
+        public {{magicReturn('int')}} update({{table.pascalName}} entity) {
         <br/>
         return {{table.camelName}}Mapper.updateSingle(entity);
         <br/>
@@ -204,7 +207,7 @@
       <div class="delete">
         @Override
         <br/>
-        public int delete({{table.pascalName}} entity) {
+        public {{magicReturn('int')}} delete({{table.pascalName}} entity) {
         <br/>
         return {{table.camelName}}Mapper.deleteSingle(entity.{{table.primaryKey}});
         <br/>
@@ -214,7 +217,7 @@
       <div class="list">
         @Override
         <br/>
-        public List{{_(table.pascalName + "DTO")}} get{{table.pascalName}}List() {
+        public {{magicReturn("List" + _(table.pascalName + "DTO"))}} get{{table.pascalName}}List() {
         <br/>
         List{{_(table.pascalName + "DTO")}} {{table.camelName}}DTOS = new ArrayList<>();
         <br/>
@@ -277,6 +280,9 @@
         setter: {
           from: 'from',
           to: 'to',
+        },
+        magic: {
+          magicReturn: ''
         }
       };
     },
@@ -294,6 +300,12 @@
             this.show[property] = false;
           }
         }
+      },
+      magicReturn(data) {
+        if (this.magic.magicReturn !== '') {
+          return this.magic.magicReturn + '<' + data + '>';
+        }
+        return data;
       }
     }
   }
@@ -326,7 +338,8 @@
   #setter {
     margin: 10px;
   }
-  .setterContent{
+
+  .setterContent {
     margin-top: 10px;
   }
 </style>
