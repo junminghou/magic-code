@@ -1,0 +1,93 @@
+const dataType = {
+  java: {
+    String: "VARCHAR",
+    Date: "DATE",
+    Integer: "INT",
+    Long: "BIGINT",
+    Timestamp: "TIMESTAMP",
+  }
+};
+
+export const dataConvert = {
+  getTable(element) {
+    let create = "CREATE TABLE";
+    let comment = "COMMENT";
+    let primaryKey = "PRIMARY KEY";
+    let inner = element.replace('\n', '');
+    let tableName = dataConvert.getDuringStr(inner, create, "(");
+    let columnBody = dataConvert.getDuringStr(inner, "(", ")", true);
+    let temp = inner.substring(inner.lastIndexOf(")"));
+    let tableDesc = "";
+    if (temp.indexOf(comment) > -1) {
+      tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);
+    }
+
+    let table = {name: tableName, description: tableDesc, columns: []};
+
+    columnBody.split(',').forEach(function (value) {
+      if (value === "") return;
+
+      let column = {};
+      value = value.trim();
+      let columnName = dataConvert.getDuringStr(value, null, " ");
+      let dataType = dataConvert.getDataType(value);
+      let desc = "";
+
+      if (value.indexOf(comment) > -1) {
+        desc = dataConvert.getDuringStr(value.split(comment)[1], "'", "'", true);
+      }
+      column.name = columnName;
+      column.pascalName = dataConvert.getPascalName(columnName);
+      column.dataType = dataType;
+      column.description = desc;
+      column.camelName = dataConvert.getCamelName(column.pascalName);
+
+      table.columns.push(column);
+      if (value.indexOf(primaryKey) > -1){
+        table.primaryKey = columnName;
+        table.primaryKeyType = dataType;
+      }
+    });
+    table.pascalName = dataConvert.getPascalName(table.name);
+    table.camelName = dataConvert.getCamelName(table.pascalName);
+    return table;
+  },
+  getPascalName(name) {
+    return dataConvert.toUpperCase(name).replace(/_/g, '');
+  },
+  getCamelName(name) {
+    return name.substring(0, 1).toLowerCase() + name.substring(1);
+  },
+  toUpperCase(str) {
+    return str.toLowerCase().replace(/(_|^)[a-z]/g, (L) => L.toUpperCase());
+  },
+  getDataType(value) {
+    if (value.indexOf(dataType.java.String) > -1) {
+      return "String";
+    }
+    if (value.indexOf(dataType.java.Long) > -1) {
+      return "Long";
+    }
+    if (value.indexOf(dataType.java.Integer) > -1) {
+      return "Integer";
+    }
+    if (value.indexOf(dataType.java.Date) > -1) {
+      return "Date";
+    }
+    if (value.indexOf(dataType.java.Timestamp) > -1) {
+      return "Date";
+    }
+    return "String";
+  },
+  getDuringStr(source, beginStr, endStr, isLastIndexOf) {
+    let beginLength = beginStr ? beginStr.length : 0;
+    let beginIndex = beginStr ? source.indexOf(beginStr) : 0;
+    let endIndex = source.indexOf(endStr);
+    if (isLastIndexOf) {
+      endIndex = source.lastIndexOf(endStr);
+    }
+
+    return source.substring(beginIndex + beginLength, endIndex).trim();
+  }
+};
+
