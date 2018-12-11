@@ -13,6 +13,7 @@ export const dataConvert = {
     let create = "CREATE TABLE";
     let comment = "COMMENT";
     let primaryKey = "PRIMARY KEY";
+    let constraint = "CONSTRAINT";
     let inner = element.replace('\n', '');
     let tableName = dataConvert.getDuringStr(inner, create, "(");
     let columnBody = dataConvert.getDuringStr(inner, "(", ")", true);
@@ -27,6 +28,9 @@ export const dataConvert = {
     columnBody.split(',').forEach(function (value) {
       if (value === "") return;
 
+      if(value.indexOf(constraint) > -1){
+        return;
+      }
       let column = {};
       value = value.trim();
       let columnName = dataConvert.getDuringStr(value, null, " ");
@@ -46,6 +50,7 @@ export const dataConvert = {
       if (value.indexOf(primaryKey) > -1){
         table.primaryKey = columnName;
         table.primaryKeyType = dataType;
+        table.primaryKeyCamel = column.camelName;
       }
     });
     table.pascalName = dataConvert.getPascalName(table.name);
