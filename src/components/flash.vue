@@ -118,16 +118,16 @@
         </div>
         <br/>
         <div class="deleteSingle">
-          @Delete("delete from {{table.name}} where id = #{id}")
+          @Delete("delete from {{table.name}} where {{table.primaryKey}} = #{id}")
           <br/>
-          int deleteById(@Param("id") {{table.primaryKeyType}} {{table.primaryKey}});
+          int deleteById(@Param("id") {{table.primaryKeyType}} {{table.primaryKeyCamel}});
         </div>
         <br>
         <div class="baseQuery">
-          @Select("{{_('script')}} select * from {{table.name}} where id = #{id} {{ _('/script')}}")
+          @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} = #{id} {{ _('/script')}}")
           <br>
           {{table.pascalName}} get{{table.pascalName}}ById(@Param("id") {{table.primaryKeyType}}
-          {{table.primaryKey}});
+          {{table.primaryKeyCamel}});
           <br>
           <br>
           @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} in " +
