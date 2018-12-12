@@ -260,7 +260,7 @@
 
       public enum {{enumData.name}} {
       <br/>
-      UNKONW(0, "未知");
+      UN_KNOW(0, "未知");
       <br/>
 
       private String name;
@@ -316,7 +316,7 @@
       <br/>
       public static {{enumData.name}} ofType(Integer source) {
       <br/>
-      if (source == null) return UNKONW;
+      if (source == null) return UN_KNOW;
 
       <br/>
       for ({{enumData.name}} item : values()) {
@@ -327,7 +327,7 @@
       <br/>
 
       <br/>
-      return UNKONW;
+      return UN_KNOW;
       <br/>
       }
       <br/>
