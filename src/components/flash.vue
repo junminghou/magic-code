@@ -262,54 +262,33 @@
       <br/>
       UN_KNOW(0, "未知");
       <br/>
-
+      private int value;
+      <br/>
       private String name;
       <br/>
-
-      private Integer type;
       <br/>
-
-      {{enumData.name}}(Integer type, String name) {
+      {{enumData.name}}(int value, String name) {
       <br/>
-
-      this.type = type;
+      this.value = value;
       <br/>
-
       this.name = name;
       <br/>
-
       }
-
+      <br/>
       <br/>
 
       public String getName() {
       <br/>
-
       return name;
       <br/>
-
-      }
-      <br/>
-
-      public void setName(String name) {
-      <br/>
-
-      this.name = name;
-      <br/>
-
-      }
-      <br/>
-
-      public Integer getType() {
-      <br/>
-      return type;
-      <br/>
       }
 
       <br/>
-      public void setType(Integer type) {
+      @Override
       <br/>
-      this.type = type;
+      public int getValue() {
+      <br/>
+      return value;
       <br/>
       }
 
@@ -317,14 +296,12 @@
       public static {{enumData.name}} ofType(Integer source) {
       <br/>
       if (source == null) return UN_KNOW;
-
       <br/>
       for ({{enumData.name}} item : values()) {
       <br/>
-      if (item.type.equals(source)) return item;
+      if (source.equals(item.value)) return item;
       <br/>
       }
-      <br/>
 
       <br/>
       return UN_KNOW;
