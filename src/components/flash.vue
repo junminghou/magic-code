@@ -9,26 +9,65 @@
     <span>{{msg}}</span>
 
     <div id="create_table_script" ref="create_table_script">
-      -- auto-generated definition
-      CREATE TABLE user
-      (
-      user_id    BIGINT                              NOT NULL
-      COMMENT '用户ID'
-      PRIMARY KEY,
-      user_type  INT                                 NULL
-      COMMENT '用户的类型，1：主账号，2：子账号',
-      parent_id  BIGINT                              NULL
-      COMMENT '主账号ID',
-      company_id BIGINT                              NULL
-      COMMENT '企业ID',
-      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-      CONSTRAINT user_user_id_uindex
-      UNIQUE (user_id),
 
+      CREATE TABLE company
+      (
+      company_id        BIGINT AUTO_INCREMENT
+      COMMENT '企业ID'
+      PRIMARY KEY,
+      name              VARCHAR(500)                        NULL
+      COMMENT '企业名称',
+      status            INT                                 NULL
+      COMMENT '认证状态',
+      company_type      INT                                 NULL
+      COMMENT '企业类型',
+      user_category1_id INT                                 NULL
+      COMMENT '用户大类ID',
+      user_category2_id INT                                 NULL
+      COMMENT '用户小类ID',
+      logo              VARCHAR(500)                        NULL
+      COMMENT 'logo',
+      district_code     INT                                 NULL
+      COMMENT '区域编码',
+      province_name     VARCHAR(50)                         NULL
+      COMMENT '省份名称',
+      city_name         VARCHAR(50)                         NULL
+      COMMENT '城市名称',
+      address           VARCHAR(1000)                       NULL
+      COMMENT '企业地址',
+      register_number   VARCHAR(50)                         NULL
+      COMMENT '营业执照注册号',
+      taxpayer_id       VARCHAR(50)                         NULL
+      COMMENT '纳税人识别号',
+      company_tel       VARCHAR(15)                         NULL
+      COMMENT '公司电话',
+      main_business     VARCHAR(50)                         NULL
+      COMMENT '主营业务',
+      company_desc      VARCHAR(1000)                       NULL
+      COMMENT '公司描述',
+      bank_name         VARCHAR(50)                         NULL
+      COMMENT '开户行',
+      bank_numer        VARCHAR(50)                         NULL
+      COMMENT '开户行号',
+      invoice_address   VARCHAR(1000)                       NULL
+      COMMENT '发票地址',
+      invoice_user_name VARCHAR(50)                         NULL
+      COMMENT '发票邮寄人',
+      invoice_tel       VARCHAR(18)                         NULL
+      COMMENT '发票邮寄人电话',
+      company_user_name VARCHAR(50)                         NULL
+      COMMENT '企业联系人',
+      company_user_tel  VARCHAR(18)                         NULL
+      COMMENT '企业联系人电话',
+      creator_user_id   BIGINT                              NULL
+      COMMENT '创建者ID',
+      gmt_create        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL,
+      gmt_modify        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
       )
-      COMMENT '用户表'
+      COMMENT '企业信息'
       ENGINE = InnoDB;
+
+
 
 
 
@@ -65,6 +104,11 @@
     </div>
 
     <div id="publicMapper" v-if="show.showMapper">
+      import org.apache.ibatis.annotations.*;
+      <br/>
+      import java.util.List;
+      <br/>
+      <br/>
       <div>public interface {{table.pascalName}}Mapper {</div>
       <div>
         <div class="querySql">
@@ -83,20 +127,44 @@
             <span v-if="index !== 0">,</span>
             <span>{{column.name}}</span>
           </span>
-            <div>
-              ) values (
-              <span v-for="(column,index) in table.columns">
+            <span>
+              ) values ( " + <br/>
+              "<span v-for="(column,index) in table.columns">
               <span v-if="index !== 0">,</span>
               <span>#{entity.{{column.camelName}}}</span>
             </span>
               )
-            </div>
+            </span>
             {{_("/script")}}")
           </div>
           <div>
             int singleInsert(@Param("entity") {{table.pascalName}} entity);
           </div>
         </div>
+        <br/>
+        <div class="batchInsert">
+          @Insert("{{_('script')}} insert into {{table.name}} (
+          <template v-for="(column,index) in table.columns">
+            <template v-if="index !==0">
+              ,
+            </template>
+            {{column.name}}
+          </template>
+          ) values " + <br/>
+        "{{_("foreach collection='list' item='item' index='index' separator=',' ")}} " + <br/>
+          "  (
+          <template v-for="(column,index) in table.columns">
+            <template v-if="index !==0">
+              ,
+            </template>
+            #{item.{{column.camelName}}}
+          </template>
+          )" + <br/>
+          "{{_("/foreach") + _("/script")}}")
+          <br/>
+          int batchInsert(@Param("list") List{{_(table.pascalName)}} {{table.camelName}});
+        </div>
+
         <br/>
         <div class="updateSingle">
           @Update("{{_('script')}} update {{table.name}} "
