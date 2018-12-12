@@ -4,71 +4,27 @@
     <i-button @click="showAction('showMapper')">mapper me!</i-button>
     <i-button @click="showAction('showService')">service me!</i-button>
     <i-button @click="showAction('showSetter')">setter me!</i-button>
+    <i-button @click="showAction('showEnum')">enum me!</i-button>
 
 
     <span>{{msg}}</span>
 
     <div id="create_table_script" ref="create_table_script">
 
-      CREATE TABLE company
+      CREATE TABLE company_image
       (
-      company_id        BIGINT AUTO_INCREMENT
+      company_id BIGINT NOT NULL
       COMMENT '企业ID'
       PRIMARY KEY,
-      name              VARCHAR(500)                        NULL
-      COMMENT '企业名称',
-      status            INT                                 NULL
-      COMMENT '认证状态',
-      company_type      INT                                 NULL
-      COMMENT '企业类型',
-      user_category1_id INT                                 NULL
-      COMMENT '用户大类ID',
-      user_category2_id INT                                 NULL
-      COMMENT '用户小类ID',
-      logo              VARCHAR(500)                        NULL
-      COMMENT 'logo',
-      district_code     INT                                 NULL
-      COMMENT '区域编码',
-      province_name     VARCHAR(50)                         NULL
-      COMMENT '省份名称',
-      city_name         VARCHAR(50)                         NULL
-      COMMENT '城市名称',
-      address           VARCHAR(1000)                       NULL
-      COMMENT '企业地址',
-      register_number   VARCHAR(50)                         NULL
-      COMMENT '营业执照注册号',
-      taxpayer_id       VARCHAR(50)                         NULL
-      COMMENT '纳税人识别号',
-      company_tel       VARCHAR(15)                         NULL
-      COMMENT '公司电话',
-      main_business     VARCHAR(50)                         NULL
-      COMMENT '主营业务',
-      company_desc      VARCHAR(1000)                       NULL
-      COMMENT '公司描述',
-      bank_name         VARCHAR(50)                         NULL
-      COMMENT '开户行',
-      bank_numer        VARCHAR(50)                         NULL
-      COMMENT '开户行号',
-      invoice_address   VARCHAR(1000)                       NULL
-      COMMENT '发票地址',
-      invoice_user_name VARCHAR(50)                         NULL
-      COMMENT '发票邮寄人',
-      invoice_tel       VARCHAR(18)                         NULL
-      COMMENT '发票邮寄人电话',
-      company_user_name VARCHAR(50)                         NULL
-      COMMENT '企业联系人',
-      company_user_tel  VARCHAR(18)                         NULL
-      COMMENT '企业联系人电话',
-      creator_user_id   BIGINT                              NULL
-      COMMENT '创建者ID',
-      gmt_create        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL,
-      gmt_modify        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
+      title VARCHAR(50) NULL
+      COMMENT '前后端约束的Key',
+      url VARCHAR(200) NULL
+      COMMENT 'Url',
+      sort INT NULL
+      COMMENT '排序'
       )
-      COMMENT '企业信息'
+      COMMENT '企业相关照片'
       ENGINE = InnoDB;
-
-
-
 
 
     </div>
@@ -151,8 +107,8 @@
             {{column.name}}
           </template>
           ) values " + <br/>
-        "{{_("foreach collection='list' item='item' index='index' separator=',' ")}} " + <br/>
-          "  (
+          "{{_("foreach collection='list' item='item' index='index' separator=',' ")}} " + <br/>
+          " (
           <template v-for="(column,index) in table.columns">
             <template v-if="index !==0">
               ,
@@ -173,14 +129,14 @@
           <template v-for="(column,index) in table.columns">
             <template v-if="column.name !== table.primaryKey ">
               <br/>
-            + " {{ _("if test = 'entity."+column.camelName+" != null'") }} {{column.name}} =
-            #{entity.{{column.camelName}}}, {{_("/if")}} "
+              + " {{ _("if test = 'entity."+column.camelName+" != null'") }} {{column.name}} =
+              #{entity.{{column.camelName}}}, {{_("/if")}} "
             </template>
           </template>
           <br/>
           + "{{_('/set')}}"
           <br/>
-          + "where {{table.primaryKey}} = #{record.{{table.primaryKeyCamel}}} {{_('/script')}}")
+          + "where {{table.primaryKey}} = #{entity.{{table.primaryKeyCamel}}} {{_('/script')}}")
           <br/>
           int update(@Param("entity") {{table.pascalName}} entity);
         </div>
@@ -295,6 +251,88 @@
         </template>
       </div>
     </div>
+
+
+    <div id="enum" v-if="show.showEnum">
+      <Input v-model="enumData.name" placeholder="枚举名称" style="width: 100px" size="small"/>
+
+      <br/>
+
+      public enum {{enumData.name}} {
+      <br/>
+      UNKONW(0, "未知");
+      <br/>
+
+      private String name;
+      <br/>
+
+      private Integer type;
+      <br/>
+
+      {{enumData.name}}(Integer type, String name) {
+      <br/>
+
+      this.type = type;
+      <br/>
+
+      this.name = name;
+      <br/>
+
+      }
+
+      <br/>
+
+      public String getName() {
+      <br/>
+
+      return name;
+      <br/>
+
+      }
+      <br/>
+
+      public void setName(String name) {
+      <br/>
+
+      this.name = name;
+      <br/>
+
+      }
+      <br/>
+
+      public Integer getType() {
+      <br/>
+      return type;
+      <br/>
+      }
+
+      <br/>
+      public void setType(Integer type) {
+      <br/>
+      this.type = type;
+      <br/>
+      }
+
+      <br/>
+      public static {{enumData.name}} ofType(Integer source) {
+      <br/>
+      if (source == null) return UNKONW;
+
+      <br/>
+      for ({{enumData.name}} item : values()) {
+      <br/>
+      if (item.type.equals(source)) return item;
+      <br/>
+      }
+      <br/>
+
+      <br/>
+      return UNKONW;
+      <br/>
+      }
+      <br/>
+      }
+    </div>
   </div>
 </template>
 
@@ -313,11 +351,16 @@
           showClass: false,
           showMapper: false,
           showService: false,
-          showSetter: false
+          showSetter: false,
+          showEnum: false,
         },
         setter: {
           from: 'from',
           to: 'to',
+        },
+        enumData: {
+          name: '',
+          values: ''
         },
         magic: {
           magicReturn: ''
