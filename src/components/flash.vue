@@ -1,27 +1,21 @@
 <template>
   <div>
+    <i-select v-model="table" style="width:200px">
+      <i-option v-for="item in tables" :value="item" :key="item">{{ item.description }}</i-option>
+    </i-select>
+
     <i-button @click="showAction('showClass')">class me!</i-button>
     <i-button @click="showAction('showMapper')">mapper me!</i-button>
     <i-button @click="showAction('showService')">service me!</i-button>
     <i-button @click="showAction('showSetter')">setter me!</i-button>
-    <i-button @click="showAction('showEnum')">enum me!</i-button>
+    <!--<i-button @click="showAction('showEnum')">enum me!</i-button>-->
+    <i-button @click="showAction('showOther')">other me!</i-button>
 
 
     <span>{{msg}}</span>
 
     <div style="display: none;">
-      -- auto-generated definition
-      CREATE TABLE customer_group_and_customers
-      (
-      id                BIGINT AUTO_INCREMENT
-      PRIMARY KEY,
-      customer_group_id BIGINT                              NULL,
-      customer_id       BIGINT                              NULL,
-      creator_user_id   BIGINT                              NULL,
-      gmt_create        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-      )
-      COMMENT '客户组与客户的关系表'
-      ENGINE = InnoDB;
+
 
     </div>
 
@@ -30,38 +24,70 @@
       -- auto-generated definition
       CREATE TABLE customer
       (
-      customer_id       BIGINT AUTO_INCREMENT
+      customer_id BIGINT AUTO_INCREMENT
       PRIMARY KEY,
-      customer_name     VARCHAR(50)                         NULL
+      customer_name VARCHAR(50) NULL
       COMMENT '客户名称',
-      register_number   VARCHAR(50)                         NULL
+      register_number VARCHAR(50) NULL
       COMMENT '营业执照注册号',
-      user_category1_id INT                                 NULL
+      user_category1_id INT NULL
       COMMENT '用户大类ID',
-      user_category2_id INT                                 NULL
+      user_category2_id INT NULL
       COMMENT '用户小类ID',
-      status            INT                                 NULL
-      COMMENT '状态:合作中、合作终止 {enum}',
-      expiration_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
+      status INT NULL
+      COMMENT '状态,合作中,合作终止',
+      expiration_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
       COMMENT '合作期限',
-      is_credit         INT                                 NULL
+      is_credit INT NULL
       COMMENT '是否支持账期',
-      credit_days       INT                                 NULL
+      credit_days INT NULL
       COMMENT '账期时长(天)',
-      credit_amount     DECIMAL                     NULL
+      credit_amount DECIMAL(16, 2) NULL
       COMMENT '账期额度',
-      purchase_range    VARCHAR(200)                        NULL
+      purchase_range VARCHAR(200) NULL
       COMMENT '可采购范围',
-      creator_user_id   BIGINT                              NULL
+      creator_user_id BIGINT NULL
       COMMENT '创建者',
-      gmt_create        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '创建时间',
-      gmt_modify        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '修改时间'
       )
       COMMENT '客户'
       ENGINE = InnoDB;
 
+      -- auto-generated definition
+      CREATE TABLE customer_group_and_customers
+      (
+      id BIGINT AUTO_INCREMENT
+      PRIMARY KEY,
+      customer_group_id BIGINT NULL,
+      customer_id BIGINT NULL,
+      creator_user_id BIGINT NULL,
+      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+      COMMENT '客户组与客户的关系表'
+      ENGINE = InnoDB;
+
+      -- auto-generated definition
+      CREATE TABLE customer_group
+      (
+      id BIGINT AUTO_INCREMENT
+      PRIMARY KEY,
+      name VARCHAR(50) NULL
+      COMMENT '客户组名称',
+      status INT DEFAULT '1' NULL
+      COMMENT '状态,1:启用,2:禁用',
+      is_all_customer INT DEFAULT '1' NULL
+      COMMENT '所属客户enum,1:全部客户,2:部分客户',
+      creator_user_id BIGINT NULL
+      COMMENT '创建者',
+      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
+      COMMENT '创建时间',
+      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
+      )
+      COMMENT '客户组'
+      ENGINE = InnoDB;
 
 
     </div>
@@ -209,7 +235,35 @@
     </div>
 
     <div id="publicService" v-if="show.showService">
-      <div>
+      <div class="rpc">
+        import com.jkys.phobos.annotation.Name;
+        <br/>
+        import com.jkys.phobos.annotation.Service;
+        <br/>
+        <br/>
+
+        @Service("XXXXXXX.CustomerService:1.0.0")
+        <br/>
+        public interface {{table.pascalName}}Service {
+        <br/>
+        long add({{table.pascalName}}Model model);
+        <br/>
+
+        int update({{table.pascalName}}Model model) ;
+        <br/>
+
+        int delete(@Name("id") Long id) ;
+        <br/>
+
+        CustomerModel detail(@Name("id") {{table.primaryKeyType}} id);
+        <br/>
+
+        List {{_(table.pascalName + "Model")}} getList();
+        <br/>
+        }
+      </div>
+      -----------------------------------------------------
+      <div class="service">
         <Input v-model="magic.magicReturn" placeholder="magicReturn" style="width: 100px" size="small"
                class="setterContent"/>
         <br/>
@@ -277,34 +331,6 @@
         }
 
       </div>
-
-      <div>
-        import com.jkys.phobos.annotation.Name;
-        <br/>
-        import com.jkys.phobos.annotation.Service;
-        <br/>
-        <br/>
-
-        @Service("XXXXXXX.CustomerService:1.0.0")
-        <br/>
-        public interface {{table.pascalName}}Service {
-        <br/>
-        long add({{table.pascalName}}Model model);
-        <br/>
-
-        int update({{table.pascalName}}Model model) ;
-        <br/>
-
-        int delete(@Name("id") Long id) ;
-        <br/>
-
-        CustomerModel detail(@Name("id") {{table.primaryKeyType}} id);
-        <br/>
-
-        List {{_(table.pascalName + "Model")}} getList();
-        <br/>
-        }
-      </div>
     </div>
 
     <div id="setter" v-if="show.showSetter">
@@ -322,93 +348,8 @@
           <br/>
         </template>
       </div>
-      <div class="showMockJson">
-        {
-          <template v-for="(column,index) in table.columns">
-            <br/>
-            "{{column.camelName}}" : null,
-          </template>
-        <br/>
-        }
-      </div>
-      <div class="showMockJsonTemplate">
-        [
-        {
-        "description": "客户名称",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "customerName"
-        },
-        {
-        "description": "营业执照注册号",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "registerNumber"
-        },
-        {
-        "description": "合作状态，YES(1, \"是\"),\n    NO(2, \"否\");",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "status"
-        },
-        {
-        "description": "合作期限",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "expirationTime"
-        },
-        {
-        "description": "是否支持账期，YES(1, \"是\"),\n    NO(2, \"否\");",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "isCredit"
-        },
-        {
-        "description": "账期时长(天)",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "creditDays"
-        },
-        {
-        "description": "账期额度",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "creditAmount"
-        },
-        {
-        "description": "可采购范围",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "purchaseRange"
-        }
-        ]
-      </div>
-    </div>
 
+    </div>
 
     <div id="enum" v-if="show.showEnum">
       <Input v-model="enumData.name" placeholder="枚举名称" style="width: 100px" size="small"/>
@@ -467,26 +408,122 @@
       <br/>
       }
     </div>
+
+    <div v-if="show.showOther">
+      <div class="showMockJson">
+        {
+        <template v-for="(column,index) in table.columns">
+          <br/>
+          "{{column.camelName}}" : null,
+        </template>
+        <br/>
+        }
+      </div>
+      <div class="showMockJsonTemplate">
+        [
+        {
+        "description": "客户名称",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "customerName"
+        },
+        {
+        "description": "营业执照注册号",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "registerNumber"
+        },
+        {
+        "description": "合作状态，YES(1, \"是\"),\n NO(2, \"否\");",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "status"
+        },
+        {
+        "description": "合作期限",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "expirationTime"
+        },
+        {
+        "description": "是否支持账期，YES(1, \"是\"),\n NO(2, \"否\");",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "isCredit"
+        },
+        {
+        "description": "账期时长(天)",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "creditDays"
+        },
+        {
+        "description": "账期额度",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "creditAmount"
+        },
+        {
+        "description": "可采购范围",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "purchaseRange"
+        }
+        ]
+      </div>
+    </div>
   </div>
 </template>
 
 
 <script>
   import {dataConvert} from '../service'
+  import ISelect from "iview/src/components/select/select";
+  import IOption from "iview/src/components/select/option";
 
   export default {
+    components: {
+      IOption,
+      ISelect
+    },
     name: 'flash',
     data() {
       return {
         visible: false,
         msg: '',
         table: '',
+        tables: '',
         show: {
           showClass: false,
           showMapper: false,
           showService: false,
           showSetter: false,
           showEnum: false,
+          showOther: false,
         },
         setter: {
           from: 'from',
@@ -501,13 +538,15 @@
         }
       };
     },
+    mounted() {
+      this.tables = dataConvert.getTable(this.$refs.create_table_script.innerText);
+      this.table = this.tables[0];
+    },
     methods: {
       _(value) {
         return "<" + value + ">";
       },
       showAction: function (data) {
-        this.table = dataConvert.getTable(this.$refs.create_table_script.innerText);
-
         for (let property in this.show) {
           if (data === property) {
             this.show[property] = true;
@@ -528,24 +567,6 @@
 
 
 <style scoped>
-  h1, h2 {
-    font-weight: normal;
-  }
-
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-
-  li {
-    display: inline-block;
-    margin: 0 10px;
-  }
-
-  a {
-    color: #42b983;
-  }
-
   #create_table_script {
     display: none;
   }

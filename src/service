@@ -15,51 +15,82 @@ export const dataConvert = {
     let comment = "COMMENT";
     let primaryKey = "PRIMARY KEY";
     let constraint = "CONSTRAINT";
-    let inner = element.replace('\n', '');
-    let tableName = dataConvert.getDuringStr(inner, create, "(");
-    let columnBody = dataConvert.getDuringStr(inner, "(", ")", true);
-    let temp = inner.substring(inner.lastIndexOf(")"));
-    let tableDesc = "";
-    if (temp.indexOf(comment) > -1) {
-      tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);
-    }
+    let decimal = "DECIMAL";
 
-    let table = {name: tableName, description: tableDesc, columns: []};
-
-    columnBody.split(',').forEach(function (value) {
-      if (value === "") return;
-
-      if (value.indexOf(constraint) > -1) {
-        return;
+    let tables = [];
+    element.split(';').forEach(function (divContent) {
+      let inner = divContent.replace('\n', '');
+      let tableName = dataConvert.getDuringStr(inner, create, "(");
+      let columnBody = dataConvert.getDuringStr(inner, "(", ")", true);
+      let temp = inner.substring(inner.lastIndexOf(")"));
+      let tableDesc = "";
+      if (temp.indexOf(comment) > -1) {
+        tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);
       }
-      let column = {};
-      value = value.trim();
-      let columnName = dataConvert.getDuringStr(value, null, " ");
-      if (columnName === '') {
-        return;
-      }
-      let dataType = dataConvert.getDataType(value);
-      let desc = "";
 
-      if (value.indexOf(comment) > -1) {
-        desc = dataConvert.getDuringStr(value.split(comment)[1], "'", "'", true);
-      }
-      column.name = columnName;
-      column.pascalName = dataConvert.getPascalName(columnName);
-      column.dataType = dataType;
-      column.description = desc;
-      column.camelName = dataConvert.getCamelName(column.pascalName);
+      let table = {name: tableName, description: tableDesc, columns: []};
 
-      table.columns.push(column);
-      if (value.indexOf(primaryKey) > -1) {
-        table.primaryKey = columnName;
-        table.primaryKeyType = dataType;
-        table.primaryKeyCamel = column.camelName;
+      let arrayColumns = columnBody.split(',');
+      let index = 0;
+      let isStart = 0;
+      for (let i = 0; i < arrayColumns.length; i++) {
+        if (isStart === 1) {
+          arrayColumns[index] += "," + arrayColumns[i];
+          if (arrayColumns[i].indexOf('\'') > -1) {
+            isStart = 0;
+          }
+          arrayColumns[i] = "";
+        }
+        if (arrayColumns[i].indexOf(comment) > -1) {
+          if ((arrayColumns[i].split('\'').length - 1) !== 2) {
+            index = i;
+            isStart = 1;
+          }
+        } else if (arrayColumns[i].indexOf(decimal) > -1) {
+          if ((arrayColumns[i].indexOf(")") === -1)) {
+            arrayColumns[i] += ("," + arrayColumns[i + 1]);
+            arrayColumns[i + 1] = "";
+            --i;
+          }
+        }
       }
+
+      arrayColumns.forEach(function (value) {
+        if (value === "") return;
+
+        if (value.indexOf(constraint) > -1) {
+          return;
+        }
+        let column = {};
+        value = value.trim();
+        let columnName = dataConvert.getDuringStr(value, null, " ");
+        if (columnName === '') {
+          return;
+        }
+        let dataType = dataConvert.getDataType(value);
+        let desc = "";
+
+        if (value.indexOf(comment) > -1) {
+          desc = dataConvert.getDuringStr(value.split(comment)[1], "'", "'", true);
+        }
+        column.name = columnName;
+        column.pascalName = dataConvert.getPascalName(columnName);
+        column.dataType = dataType;
+        column.description = desc;
+        column.camelName = dataConvert.getCamelName(column.pascalName);
+
+        table.columns.push(column);
+        if (value.indexOf(primaryKey) > -1) {
+          table.primaryKey = columnName;
+          table.primaryKeyType = dataType;
+          table.primaryKeyCamel = column.camelName;
+        }
+      });
+      table.pascalName = dataConvert.getPascalName(table.name);
+      table.camelName = dataConvert.getCamelName(table.pascalName);
+      tables.push(table);
     });
-    table.pascalName = dataConvert.getPascalName(table.name);
-    table.camelName = dataConvert.getCamelName(table.pascalName);
-    return table;
+    return tables;
   },
   getPascalName(name) {
     return dataConvert.toUpperCase(name).replace(/_/g, '');
