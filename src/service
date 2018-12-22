@@ -5,6 +5,7 @@ const dataType = {
     Integer: "INT",
     Long: "BIGINT",
     Timestamp: "TIMESTAMP",
+    BigDecimal: "DECIMAL"
   }
 };
 
@@ -28,12 +29,15 @@ export const dataConvert = {
     columnBody.split(',').forEach(function (value) {
       if (value === "") return;
 
-      if(value.indexOf(constraint) > -1){
+      if (value.indexOf(constraint) > -1) {
         return;
       }
       let column = {};
       value = value.trim();
       let columnName = dataConvert.getDuringStr(value, null, " ");
+      if (columnName === '') {
+        return;
+      }
       let dataType = dataConvert.getDataType(value);
       let desc = "";
 
@@ -47,7 +51,7 @@ export const dataConvert = {
       column.camelName = dataConvert.getCamelName(column.pascalName);
 
       table.columns.push(column);
-      if (value.indexOf(primaryKey) > -1){
+      if (value.indexOf(primaryKey) > -1) {
         table.primaryKey = columnName;
         table.primaryKeyType = dataType;
         table.primaryKeyCamel = column.camelName;
@@ -81,6 +85,9 @@ export const dataConvert = {
     }
     if (value.indexOf(dataType.java.Timestamp) > -1) {
       return "Date";
+    }
+    if (value.indexOf(dataType.java.BigDecimal) > -1) {
+      return "BigDecimal";
     }
     return "String";
   },

@@ -9,22 +9,59 @@
 
     <span>{{msg}}</span>
 
+    <div style="display: none;">
+      -- auto-generated definition
+      CREATE TABLE customer_group_and_customers
+      (
+      id                BIGINT AUTO_INCREMENT
+      PRIMARY KEY,
+      customer_group_id BIGINT                              NULL,
+      customer_id       BIGINT                              NULL,
+      creator_user_id   BIGINT                              NULL,
+      gmt_create        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+      COMMENT '客户组与客户的关系表'
+      ENGINE = InnoDB;
+
+    </div>
+
     <div id="create_table_script" ref="create_table_script">
 
-      CREATE TABLE company_image
+      -- auto-generated definition
+      CREATE TABLE customer
       (
-      company_id BIGINT NOT NULL
-      COMMENT '企业ID'
+      customer_id       BIGINT AUTO_INCREMENT
       PRIMARY KEY,
-      title VARCHAR(50) NULL
-      COMMENT '前后端约束的Key',
-      url VARCHAR(200) NULL
-      COMMENT 'Url',
-      sort INT NULL
-      COMMENT '排序'
+      customer_name     VARCHAR(50)                         NULL
+      COMMENT '客户名称',
+      register_number   VARCHAR(50)                         NULL
+      COMMENT '营业执照注册号',
+      user_category1_id INT                                 NULL
+      COMMENT '用户大类ID',
+      user_category2_id INT                                 NULL
+      COMMENT '用户小类ID',
+      status            INT                                 NULL
+      COMMENT '状态:合作中、合作终止 {enum}',
+      expiration_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
+      COMMENT '合作期限',
+      is_credit         INT                                 NULL
+      COMMENT '是否支持账期',
+      credit_days       INT                                 NULL
+      COMMENT '账期时长(天)',
+      credit_amount     DECIMAL                     NULL
+      COMMENT '账期额度',
+      purchase_range    VARCHAR(200)                        NULL
+      COMMENT '可采购范围',
+      creator_user_id   BIGINT                              NULL
+      COMMENT '创建者',
+      gmt_create        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      COMMENT '创建时间',
+      gmt_modify        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      COMMENT '修改时间'
       )
-      COMMENT '企业相关照片'
+      COMMENT '客户'
       ENGINE = InnoDB;
+
 
 
     </div>
@@ -80,14 +117,18 @@
           <div>
             @Insert("{{_("script")}} insert into {{table.name}} (
             <span v-for="(column,index) in table.columns">
-            <span v-if="index !== 0">,</span>
-            <span>{{column.name}}</span>
+              <template v-if="column.name !== table.primaryKey">
+                  {{column.name}}
+                  <span v-if="index !== (table.columns.length-1)">,</span>
+              </template>
           </span>
             <span>
               ) values ( " + <br/>
               "<span v-for="(column,index) in table.columns">
-              <span v-if="index !== 0">,</span>
-              <span>#{entity.{{column.camelName}}}</span>
+                 <template v-if="column.name !== table.primaryKey">
+                        <span>#{entity.{{column.camelName}}}</span>
+                        <span v-if="index !== (table.columns.length-1)">,</span>
+                 </template>
             </span>
               )
             </span>
@@ -168,71 +209,102 @@
     </div>
 
     <div id="publicService" v-if="show.showService">
-      <Input v-model="magic.magicReturn" placeholder="magicReturn" style="width: 100px" size="small"
-             class="setterContent"/>
-      <br/>
-      public class {{table.pascalName}}Service {
-      <br/>
-      @Autowired()
-      <br/>
-      private {{table.pascalName}}Mapper {{table.camelName}}Mapper;
-      <br/>
-      <br/>
-      <div class="add">
-        @Override
+      <div>
+        <Input v-model="magic.magicReturn" placeholder="magicReturn" style="width: 100px" size="small"
+               class="setterContent"/>
         <br/>
-        public {{magicReturn('int')}} add({{table.pascalName}} entity) {
+        public class {{table.pascalName}}ServiceImpl {
         <br/>
-        return {{table.camelName}}Mapper.insertSingle(entity);
+        @Autowired()
+        <br/>
+        private {{table.pascalName}}Mapper {{table.camelName}}Mapper;
+        <br/>
+        <br/>
+        <div class="add">
+          @Override
+          <br/>
+          public {{magicReturn('int')}} add({{table.pascalName}} entity) {
+          <br/>
+          return {{table.camelName}}Mapper.insertSingle(entity);
+          <br/>
+          }
+        </div>
+
+        <div class="update">
+          @Override
+          <br/>
+          public {{magicReturn('int')}} update({{table.pascalName}} entity) {
+          <br/>
+          return {{table.camelName}}Mapper.updateSingle(entity);
+          <br/>
+          }
+        </div>
+
+        <div class="delete">
+          @Override
+          <br/>
+          public {{magicReturn('int')}} delete({{table.pascalName}} entity) {
+          <br/>
+          return {{table.camelName}}Mapper.deleteSingle(entity.{{table.primaryKey}});
+          <br/>
+          }
+        </div>
+
+        <div class="list">
+          @Override
+          <br/>
+          public {{magicReturn("List" + _(table.pascalName + "DTO"))}} get{{table.pascalName}}List() {
+          <br/>
+          List{{_(table.pascalName + "DTO")}} {{table.camelName}}DTOS = new ArrayList<>();
+          <br/>
+
+          List{{_(table.pascalName)}} {{table.camelName}}s = districtMapper.get{{table.pascalName}}List();
+          <br/>
+
+          {{table.camelName}}s.forEach(entity -> {
+          <br/>
+
+          });
+          <br/>
+
+          return {{table.camelName}}DTOS;
+          <br/>
+
+          }
+        </div>
+
+        <br/>
+        }
+
+      </div>
+
+      <div>
+        import com.jkys.phobos.annotation.Name;
+        <br/>
+        import com.jkys.phobos.annotation.Service;
+        <br/>
+        <br/>
+
+        @Service("XXXXXXX.CustomerService:1.0.0")
+        <br/>
+        public interface {{table.pascalName}}Service {
+        <br/>
+        long add({{table.pascalName}}Model model);
+        <br/>
+
+        int update({{table.pascalName}}Model model) ;
+        <br/>
+
+        int delete(@Name("id") Long id) ;
+        <br/>
+
+        CustomerModel detail(@Name("id") {{table.primaryKeyType}} id);
+        <br/>
+
+        List {{_(table.pascalName + "Model")}} getList();
         <br/>
         }
       </div>
-
-      <div class="update">
-        @Override
-        <br/>
-        public {{magicReturn('int')}} update({{table.pascalName}} entity) {
-        <br/>
-        return {{table.camelName}}Mapper.updateSingle(entity);
-        <br/>
-        }
-      </div>
-
-      <div class="delete">
-        @Override
-        <br/>
-        public {{magicReturn('int')}} delete({{table.pascalName}} entity) {
-        <br/>
-        return {{table.camelName}}Mapper.deleteSingle(entity.{{table.primaryKey}});
-        <br/>
-        }
-      </div>
-
-      <div class="list">
-        @Override
-        <br/>
-        public {{magicReturn("List" + _(table.pascalName + "DTO"))}} get{{table.pascalName}}List() {
-        <br/>
-        List{{_(table.pascalName + "DTO")}} {{table.camelName}}DTOS = new ArrayList<>();
-        <br/>
-
-        List{{_(table.pascalName)}} {{table.camelName}}s = districtMapper.get{{table.pascalName}}List();
-        <br/>
-
-        {{table.camelName}}s.forEach(entity -> {
-        <br/>
-
-        });
-        <br/>
-
-        return {{table.camelName}}DTOS;
-        <br/>
-
-        }
-      </div>
-
-      <br/>
-      }
     </div>
 
     <div id="setter" v-if="show.showSetter">
@@ -249,6 +321,91 @@
           {{setter.to}}.set{{column.pascalName}}({{column.camelName}});
           <br/>
         </template>
+      </div>
+      <div class="showMockJson">
+        {
+          <template v-for="(column,index) in table.columns">
+            <br/>
+            "{{column.camelName}}" : null,
+          </template>
+        <br/>
+        }
+      </div>
+      <div class="showMockJsonTemplate">
+        [
+        {
+        "description": "客户名称",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "customerName"
+        },
+        {
+        "description": "营业执照注册号",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "registerNumber"
+        },
+        {
+        "description": "合作状态，YES(1, \"是\"),\n    NO(2, \"否\");",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "status"
+        },
+        {
+        "description": "合作期限",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "expirationTime"
+        },
+        {
+        "description": "是否支持账期，YES(1, \"是\"),\n    NO(2, \"否\");",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "isCredit"
+        },
+        {
+        "description": "账期时长(天)",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "creditDays"
+        },
+        {
+        "description": "账期额度",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "creditAmount"
+        },
+        {
+        "description": "可采购范围",
+        "mockValue": "",
+        "mockNum": "",
+        "mockType": "String",
+        "required": true,
+        "type": "String",
+        "name": "purchaseRange"
+        }
+        ]
       </div>
     </div>
 
