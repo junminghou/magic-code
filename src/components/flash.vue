@@ -24,37 +24,45 @@
       -- auto-generated definition
       CREATE TABLE customer
       (
-      customer_id BIGINT AUTO_INCREMENT
+      customer_id        BIGINT AUTO_INCREMENT
       PRIMARY KEY,
-      customer_name VARCHAR(50) NULL
+      customer_name      VARCHAR(50)                         NULL
       COMMENT '客户名称',
-      register_number VARCHAR(50) NULL
+      register_number    VARCHAR(50)                         NULL
       COMMENT '营业执照注册号',
-      user_category1_id INT NULL
+      user_category1_id  INT                                 NULL
       COMMENT '用户大类ID',
-      user_category2_id INT NULL
+      user_category2_id  INT                                 NULL
       COMMENT '用户小类ID',
-      status INT NULL
-      COMMENT '状态,合作中,合作终止',
-      expiration_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
+      status             INT                                 NULL
+      COMMENT '状态，合作中，合作终止 {enum}',
+      expiration_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
       COMMENT '合作期限',
-      is_credit INT NULL
+      is_credit          INT                                 NULL
       COMMENT '是否支持账期',
-      credit_days INT NULL
+      credit_days        INT                                 NULL
       COMMENT '账期时长(天)',
-      credit_amount DECIMAL(16, 2) NULL
+      credit_amount      DECIMAL(16, 2)                      NULL
       COMMENT '账期额度',
-      purchase_range VARCHAR(200) NULL
+      purchase_range     VARCHAR(200)                        NULL
       COMMENT '可采购范围',
-      creator_user_id BIGINT NULL
+      creator_user_id    BIGINT                              NULL
       COMMENT '创建者',
-      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      creator_company_id BIGINT                              NULL
+      COMMENT '创建者公司ID',
+      company_id         BIGINT                              NULL
+      COMMENT '买家ID',
+      gmt_create         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '创建时间',
-      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      gmt_modify         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '修改时间'
       )
       COMMENT '客户'
       ENGINE = InnoDB;
+
+
+
+
 
       -- auto-generated definition
       CREATE TABLE customer_group_and_customers
@@ -141,6 +149,8 @@
         <br/>
         <div class="insertSingle">
           <div>
+            @Options(useGeneratedKeys = true, keyProperty = "entity.{{table.primaryKeyCamel}}", keyColumn = "{{table.primaryKey}}")
+            <br/>
             @Insert("{{_("script")}} insert into {{table.name}} (
             <span v-for="(column,index) in table.columns">
               <template v-if="column.name !== table.primaryKey">
