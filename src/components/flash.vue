@@ -24,44 +24,41 @@
       -- auto-generated definition
       CREATE TABLE customer
       (
-      customer_id        BIGINT AUTO_INCREMENT
+      customer_id BIGINT AUTO_INCREMENT
       PRIMARY KEY,
-      customer_name      VARCHAR(50)                         NULL
+      customer_name VARCHAR(50) NULL
       COMMENT '客户名称',
-      register_number    VARCHAR(50)                         NULL
+      register_number VARCHAR(50) NULL
       COMMENT '营业执照注册号',
-      user_category1_id  INT                                 NULL
+      user_category1_id INT NULL
       COMMENT '用户大类ID',
-      user_category2_id  INT                                 NULL
+      user_category2_id INT NULL
       COMMENT '用户小类ID',
-      status             INT                                 NULL
+      status INT NULL
       COMMENT '状态，合作中，合作终止 {enum}',
-      expiration_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
+      expiration_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
       COMMENT '合作期限',
-      is_credit          INT                                 NULL
+      is_credit INT NULL
       COMMENT '是否支持账期',
-      credit_days        INT                                 NULL
+      credit_days INT NULL
       COMMENT '账期时长(天)',
-      credit_amount      DECIMAL(16, 2)                      NULL
+      credit_amount DECIMAL(16, 2) NULL
       COMMENT '账期额度',
-      purchase_range     VARCHAR(200)                        NULL
+      purchase_range VARCHAR(200) NULL
       COMMENT '可采购范围',
-      creator_user_id    BIGINT                              NULL
+      creator_user_id BIGINT NULL
       COMMENT '创建者',
-      creator_company_id BIGINT                              NULL
+      creator_company_id BIGINT NULL
       COMMENT '创建者公司ID',
-      company_id         BIGINT                              NULL
+      company_id BIGINT NULL
       COMMENT '买家ID',
-      gmt_create         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '创建时间',
-      gmt_modify         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '修改时间'
       )
       COMMENT '客户'
       ENGINE = InnoDB;
-
-
-
 
 
       -- auto-generated definition
@@ -95,6 +92,30 @@
       gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
       )
       COMMENT '客户组'
+      ENGINE = InnoDB;
+
+      -- auto-generated definition
+      CREATE TABLE menu
+      (
+      menu_id INT AUTO_INCREMENT
+      COMMENT '菜单ID'
+      PRIMARY KEY,
+      menu_code VARCHAR(50) NULL
+      COMMENT '菜单code',
+      menu_name VARCHAR(50) NULL
+      COMMENT '菜单名称',
+      menu_desc VARCHAR(100) NULL
+      COMMENT '菜单描述',
+      menu_url VARCHAR(200) NULL
+      COMMENT '菜单Url',
+      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+      CONSTRAINT menu_menu_id_uindex
+      UNIQUE (menu_id),
+      CONSTRAINT menu_menu_code_pk
+      UNIQUE (menu_code)
+      )
+      COMMENT '菜单表'
       ENGINE = InnoDB;
 
 
@@ -149,7 +170,8 @@
         <br/>
         <div class="insertSingle">
           <div>
-            @Options(useGeneratedKeys = true, keyProperty = "entity.{{table.primaryKeyCamel}}", keyColumn = "{{table.primaryKey}}")
+            @Options(useGeneratedKeys = true, keyProperty = "entity.{{table.primaryKeyCamel}}", keyColumn =
+            "{{table.primaryKey}}")
             <br/>
             @Insert("{{_("script")}} insert into {{table.name}} (
             <span v-for="(column,index) in table.columns">
@@ -175,6 +197,7 @@
           </div>
         </div>
         <br/>
+        <!--TODO 批量插入待优化-->
         <div class="batchInsert">
           @Insert("{{_('script')}} insert into {{table.name}} (
           <template v-for="(column,index) in table.columns">
@@ -223,6 +246,7 @@
           <br/>
           int deleteById(@Param("id") {{table.primaryKeyType}} {{table.primaryKeyCamel}});
         </div>
+        <!--TODO   待加入批量删除功能-->
         <br>
         <div class="baseQuery">
           @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} = #{id} {{ _('/script')}}")
@@ -431,78 +455,31 @@
       </div>
       <div class="showMockJsonTemplate">
         [
+        <br/>
         {
-        "description": "客户名称",
+        "description": "",
         "mockValue": "",
         "mockNum": "",
         "mockType": "String",
         "required": true,
-        "type": "String",
-        "name": "customerName"
-        },
-        {
-        "description": "营业执照注册号",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "registerNumber"
-        },
-        {
-        "description": "合作状态，YES(1, \"是\"),\n NO(2, \"否\");",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "status"
-        },
-        {
-        "description": "合作期限",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "expirationTime"
-        },
-        {
-        "description": "是否支持账期，YES(1, \"是\"),\n NO(2, \"否\");",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "isCredit"
-        },
-        {
-        "description": "账期时长(天)",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "creditDays"
-        },
-        {
-        "description": "账期额度",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "creditAmount"
-        },
-        {
-        "description": "可采购范围",
-        "mockValue": "",
-        "mockNum": "",
-        "mockType": "String",
-        "required": true,
-        "type": "String",
-        "name": "purchaseRange"
-        }
+        "type": "Array",
+        "name": "data",
+        "children":[
+        <template v-for="(column,index) in table.columns">
+          <br/>
+          {
+          "description": "{{column.description}}",
+          "mockValue": "",
+          "mockNum": "",
+          "mockType": "String",
+          "required": true,
+          "type": "String",
+          "name": "{{column.camelName}}"
+          }
+          {{after(",",index,table.columns.length)}}
+        </template>
+        ]
+        <br/>
         ]
       </div>
     </div>
@@ -555,6 +532,16 @@
     methods: {
       _(value) {
         return "<" + value + ">";
+      },
+      before(symbol, index) {
+        if (index === 0) {
+          return symbol;
+        }
+      },
+      after(symbol, index, length) {
+        if (index < length - 1) {
+          return symbol;
+        }
       },
       showAction: function (data) {
         for (let property in this.show) {

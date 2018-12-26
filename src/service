@@ -64,7 +64,7 @@ export const dataConvert = {
         let column = {};
         value = value.trim();
         let columnName = dataConvert.getDuringStr(value, null, " ");
-        if (columnName === '') {
+        if (columnName === '' || columnName === 'gmt_create' || columnName === 'gmt_modify') {
           return;
         }
         let dataType = dataConvert.getDataType(value);
