@@ -460,7 +460,7 @@
         "description": "",
         "mockValue": "",
         "mockNum": "",
-        "mockType": "String",
+        "mockType": "Array",
         "required": true,
         "type": "Array",
         "name": "data",
@@ -478,7 +478,7 @@
           }
           {{after(",",index,table.columns.length)}}
         </template>
-        ]
+        ]}
         <br/>
         ]
       </div>
@@ -504,6 +504,9 @@
         msg: '',
         table: '',
         tables: '',
+        filter: {
+          columns: ['gmt_create', 'gmt_modify']
+        },
         show: {
           showClass: false,
           showMapper: false,
@@ -526,7 +529,7 @@
       };
     },
     mounted() {
-      this.tables = dataConvert.getTable(this.$refs.create_table_script.innerText);
+      this.tables = dataConvert.getTable(this.$refs.create_table_script.innerText, this.filter.columns);
       this.table = this.tables[0];
     },
     methods: {

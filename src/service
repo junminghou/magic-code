@@ -10,7 +10,7 @@ const dataType = {
 };
 
 export const dataConvert = {
-  getTable(element) {
+  getTable(element, filterColumns) {
     let create = "CREATE TABLE";
     let comment = "COMMENT";
     let primaryKey = "PRIMARY KEY";
@@ -64,9 +64,13 @@ export const dataConvert = {
         let column = {};
         value = value.trim();
         let columnName = dataConvert.getDuringStr(value, null, " ");
-        if (columnName === '' || columnName === 'gmt_create' || columnName === 'gmt_modify') {
+        if (columnName === '') {
           return;
         }
+        if (filterColumns.indexOf(columnName) > -1) {
+          return;
+        }
+
         let dataType = dataConvert.getDataType(value);
         let desc = "";
 
