@@ -9,7 +9,7 @@
     <i-button @click="showAction('showService')">service me!</i-button>
     <i-button @click="showAction('showSetter')">setter me!</i-button>
     <!--<i-button @click="showAction('showEnum')">enum me!</i-button>-->
-    <i-button @click="showAction('showOther')">other me!</i-button>
+    <i-button @click="showAction('showOther')">mock me!</i-button>
 
 
     <span>{{msg}}</span>
