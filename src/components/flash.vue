@@ -24,37 +24,41 @@
       -- auto-generated definition
       CREATE TABLE customer
       (
-      customer_id BIGINT AUTO_INCREMENT
+      id                      BIGINT AUTO_INCREMENT
       PRIMARY KEY,
-      customer_name VARCHAR(50) NULL
+      customer_code           VARCHAR(50)                         NULL
+      COMMENT '客户编码',
+      customer_name           VARCHAR(50)                         NULL
       COMMENT '客户名称',
-      register_number VARCHAR(50) NULL
+      register_number         VARCHAR(50)                         NULL
       COMMENT '营业执照注册号',
-      user_category1_id INT NULL
+      company_id              BIGINT                              NULL
+      COMMENT '企业ID',
+      user_category1_id       INT                                 NULL
       COMMENT '用户大类ID',
-      user_category2_id INT NULL
+      user_category2_id       INT                                 NULL
       COMMENT '用户小类ID',
-      status INT NULL
+      status                  VARCHAR(50)                         NULL
       COMMENT '状态，合作中，合作终止 {enum}',
-      expiration_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
+      expiration_time         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
       COMMENT '合作期限',
-      is_credit INT NULL
+      is_credit               INT                                 NULL
       COMMENT '是否支持账期',
-      credit_days INT NULL
+      credit_days             INT                                 NULL
       COMMENT '账期时长(天)',
-      credit_amount DECIMAL(16, 2) NULL
-      COMMENT '账期额度',
-      purchase_range VARCHAR(200) NULL
+      credit_amount           DECIMAL(16, 2)                      NULL
+      COMMENT '账期额度、授信额度',
+      available_credit_amount DECIMAL(16, 2)                      NULL
+      COMMENT '可用信用额度',
+      purchase_range          VARCHAR(200)                        NULL
       COMMENT '可采购范围',
-      creator_user_id BIGINT NULL
+      creator_user_id         BIGINT                              NULL
       COMMENT '创建者',
-      creator_company_id BIGINT NULL
+      creator_company_id      BIGINT                              NULL
       COMMENT '创建者公司ID',
-      company_id BIGINT NULL
-      COMMENT '买家ID',
-      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      gmt_create              TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '创建时间',
-      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      gmt_modify              TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '修改时间'
       )
       COMMENT '客户'
@@ -116,6 +120,43 @@
       UNIQUE (menu_code)
       )
       COMMENT '菜单表'
+      ENGINE = InnoDB;
+
+
+      -- auto-generated definition
+      CREATE TABLE user
+      (
+      user_id       BIGINT                              NOT NULL
+      COMMENT '用户ID'
+      PRIMARY KEY,
+      user_name     VARCHAR(50)                         NULL
+      COMMENT '用户账号',
+      nick_name     VARCHAR(50)                         NULL
+      COMMENT '昵称',
+      mobile        VARCHAR(50)                         NULL
+      COMMENT '手机号',
+      user_type     INT                                 NULL
+      COMMENT '用户的类型，1：主账号，2：子账号',
+      parent_id     BIGINT                              NULL
+      COMMENT '主账号ID',
+      company_id    BIGINT                              NULL
+      COMMENT '企业ID',
+      role_id       INT                                 NULL
+      COMMENT '角色ID',
+      status        INT                                 NULL
+      COMMENT '用户状态，1：启用，2：禁用',
+      user_code     VARCHAR(50)                         NULL
+      COMMENT '工号',
+      dept_code     VARCHAR(50)                         NULL
+      COMMENT '部门编码',
+      product_lines VARCHAR(500)                        NULL
+      COMMENT '产品线',
+      gmt_create    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+      gmt_modify    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+      CONSTRAINT user_user_id_uindex
+      UNIQUE (user_id)
+      )
+      COMMENT '用户表'
       ENGINE = InnoDB;
 
 
