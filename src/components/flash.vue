@@ -46,9 +46,9 @@
       COMMENT '是否支持账期',
       credit_days             INT                                 NULL
       COMMENT '账期时长(天)',
-      credit_amount           DECIMAL(16, 2)                      NULL
+      credit_amount           DECIMAL(16, 2) DEFAULT '0.00'       NULL
       COMMENT '账期额度、授信额度',
-      available_credit_amount DECIMAL(16, 2)                      NULL
+      available_credit_amount DECIMAL(16, 2) DEFAULT '0.00'       NULL
       COMMENT '可用信用额度',
       purchase_range          VARCHAR(200)                        NULL
       COMMENT '可采购范围',
@@ -56,6 +56,12 @@
       COMMENT '创建者',
       creator_company_id      BIGINT                              NULL
       COMMENT '创建者公司ID',
+      balance                 DECIMAL(16, 2) DEFAULT '0.00'       NULL
+      COMMENT '借记卡余额',
+      credit_used             DECIMAL(16, 2) DEFAULT '0.00'       NULL
+      COMMENT '已使用信用额度',
+      version                 INT DEFAULT '0'                     NULL
+      COMMENT '乐观锁更新',
       gmt_create              TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '创建时间',
       gmt_modify              TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -157,6 +163,16 @@
       UNIQUE (user_id)
       )
       COMMENT '用户表'
+      ENGINE = InnoDB;
+
+
+      -- auto-generated definition
+      CREATE TABLE company
+      (
+      fast_category_flag BIGINT                              NULL
+      COMMENT '快速分类判定标识',
+      )
+      COMMENT '企业信息'
       ENGINE = InnoDB;
 
 

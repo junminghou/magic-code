@@ -42,7 +42,9 @@ export const dataConvert = {
           arrayColumns[i] = "";
         }
         if (arrayColumns[i].indexOf(comment) > -1) {
-          if ((arrayColumns[i].split('\'').length - 1) !== 2) {
+          let comment_value = dataConvert.getDuringStr(arrayColumns[i], comment, '\'', true);
+
+          if (comment_value.split('\'').length !== 2) {
             index = i;
             isStart = 1;
           }
