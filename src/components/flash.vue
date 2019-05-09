@@ -20,160 +20,44 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
+      -- auto-generated definition
+      CREATE TABLE st_region_config
+      (
+      id         INT AUTO_INCREMENT
+      PRIMARY KEY,
+      department VARCHAR(255) NULL
+      COMMENT '部门',
+      big_region VARCHAR(255) NULL
+      COMMENT '大区',
+      province   VARCHAR(255) NULL
+      COMMENT '省'
+      )
+      COMMENT '区域配置表'
+      ENGINE = InnoDB;
 
       -- auto-generated definition
-      CREATE TABLE customer
+      CREATE TABLE item_template
       (
-      id                      BIGINT AUTO_INCREMENT
+      id                 BIGINT AUTO_INCREMENT
+      COMMENT '主键'
       PRIMARY KEY,
-      customer_code           VARCHAR(50)                         NULL
-      COMMENT '客户编码',
-      customer_name           VARCHAR(50)                         NULL
-      COMMENT '客户名称',
-      register_number         VARCHAR(50)                         NULL
-      COMMENT '营业执照注册号',
-      company_id              BIGINT                              NULL
-      COMMENT '企业ID',
-      user_category1_id       INT                                 NULL
-      COMMENT '用户大类ID',
-      user_category2_id       INT                                 NULL
-      COMMENT '用户小类ID',
-      status                  VARCHAR(50)                         NULL
-      COMMENT '状态，合作中，合作终止 {enum}',
-      expiration_time         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
-      COMMENT '合作期限',
-      is_credit               INT                                 NULL
-      COMMENT '是否支持账期',
-      credit_days             INT                                 NULL
-      COMMENT '账期时长(天)',
-      credit_amount           DECIMAL(16, 2) DEFAULT '0.00'       NULL
-      COMMENT '账期额度、授信额度',
-      available_credit_amount DECIMAL(16, 2) DEFAULT '0.00'       NULL
-      COMMENT '可用信用额度',
-      purchase_range          VARCHAR(200)                        NULL
-      COMMENT '可采购范围',
-      creator_user_id         BIGINT                              NULL
-      COMMENT '创建者',
-      creator_company_id      BIGINT                              NULL
+      name               VARCHAR(50)                         NULL
+      COMMENT '模板名称',
+      creator_user_id    BIGINT                              NULL
+      COMMENT '创建者UserId',
+      creator_company_id BIGINT                              NULL
       COMMENT '创建者公司ID',
-      balance                 DECIMAL(16, 2) DEFAULT '0.00'       NULL
-      COMMENT '借记卡余额',
-      credit_used             DECIMAL(16, 2) DEFAULT '0.00'       NULL
-      COMMENT '已使用信用额度',
-      version                 INT DEFAULT '0'                     NULL
-      COMMENT '乐观锁更新',
-      gmt_create              TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      buyer_company_id   BIGINT                              NULL
+      COMMENT '买家的企业ID',
+      seller_company_id  BIGINT                              NULL
+      COMMENT '卖家的企业ID',
+      gmt_create         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       COMMENT '创建时间',
-      gmt_modify              TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-      COMMENT '修改时间'
+      gmt_modify         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       )
-      COMMENT '客户'
+      COMMENT '商品魔板'
       ENGINE = InnoDB;
 
-
-      -- auto-generated definition
-      CREATE TABLE customer_group_and_customers
-      (
-      id BIGINT AUTO_INCREMENT
-      PRIMARY KEY,
-      customer_group_id BIGINT NULL,
-      customer_id BIGINT NULL,
-      creator_user_id BIGINT NULL,
-      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-      )
-      COMMENT '客户组与客户的关系表'
-      ENGINE = InnoDB;
-
-      -- auto-generated definition
-      CREATE TABLE customer_group
-      (
-      id BIGINT AUTO_INCREMENT
-      PRIMARY KEY,
-      name VARCHAR(50) NULL
-      COMMENT '客户组名称',
-      status INT DEFAULT '1' NULL
-      COMMENT '状态,1:启用,2:禁用',
-      is_all_customer INT DEFAULT '1' NULL
-      COMMENT '所属客户enum,1:全部客户,2:部分客户',
-      creator_user_id BIGINT NULL
-      COMMENT '创建者',
-      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
-      COMMENT '创建时间',
-      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
-      )
-      COMMENT '客户组'
-      ENGINE = InnoDB;
-
-      -- auto-generated definition
-      CREATE TABLE menu
-      (
-      menu_id INT AUTO_INCREMENT
-      COMMENT '菜单ID'
-      PRIMARY KEY,
-      menu_code VARCHAR(50) NULL
-      COMMENT '菜单code',
-      menu_name VARCHAR(50) NULL
-      COMMENT '菜单名称',
-      menu_desc VARCHAR(100) NULL
-      COMMENT '菜单描述',
-      menu_url VARCHAR(200) NULL
-      COMMENT '菜单Url',
-      gmt_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-      gmt_modify TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-      CONSTRAINT menu_menu_id_uindex
-      UNIQUE (menu_id),
-      CONSTRAINT menu_menu_code_pk
-      UNIQUE (menu_code)
-      )
-      COMMENT '菜单表'
-      ENGINE = InnoDB;
-
-
-      -- auto-generated definition
-      CREATE TABLE user
-      (
-      user_id       BIGINT                              NOT NULL
-      COMMENT '用户ID'
-      PRIMARY KEY,
-      user_name     VARCHAR(50)                         NULL
-      COMMENT '用户账号',
-      nick_name     VARCHAR(50)                         NULL
-      COMMENT '昵称',
-      mobile        VARCHAR(50)                         NULL
-      COMMENT '手机号',
-      user_type     INT                                 NULL
-      COMMENT '用户的类型，1：主账号，2：子账号',
-      parent_id     BIGINT                              NULL
-      COMMENT '主账号ID',
-      company_id    BIGINT                              NULL
-      COMMENT '企业ID',
-      role_id       INT                                 NULL
-      COMMENT '角色ID',
-      status        INT                                 NULL
-      COMMENT '用户状态，1：启用，2：禁用',
-      user_code     VARCHAR(50)                         NULL
-      COMMENT '工号',
-      dept_code     VARCHAR(50)                         NULL
-      COMMENT '部门编码',
-      product_lines VARCHAR(500)                        NULL
-      COMMENT '产品线',
-      gmt_create    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-      gmt_modify    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-      CONSTRAINT user_user_id_uindex
-      UNIQUE (user_id)
-      )
-      COMMENT '用户表'
-      ENGINE = InnoDB;
-
-
-      -- auto-generated definition
-      CREATE TABLE company
-      (
-      fast_category_flag BIGINT                              NULL
-      COMMENT '快速分类判定标识',
-      )
-      COMMENT '企业信息'
-      ENGINE = InnoDB;
 
 
     </div>
