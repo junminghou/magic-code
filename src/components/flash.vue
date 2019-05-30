@@ -21,42 +21,32 @@
 
     <div id="create_table_script" ref="create_table_script">
       -- auto-generated definition
-      CREATE TABLE st_region_config
+      CREATE TABLE sys_operation_log
       (
-      id         INT AUTO_INCREMENT
+      id               BIGINT AUTO_INCREMENT
       PRIMARY KEY,
-      department VARCHAR(255) NULL
-      COMMENT '部门',
-      big_region VARCHAR(255) NULL
-      COMMENT '大区',
-      province   VARCHAR(255) NULL
-      COMMENT '省'
+      gmt_create       DATETIME DEFAULT CURRENT_TIMESTAMP NULL
+      COMMENT '创建时间',
+      gmt_modify       DATETIME DEFAULT CURRENT_TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+      user_id          BIGINT                             NULL
+      COMMENT '操作人ID',
+      user_name        VARCHAR(100)                       NULL
+      COMMENT '操作人姓名',
+      module_type      VARCHAR(50)                        NULL
+      COMMENT '模块类型',
+      module_name      VARCHAR(500)                       NULL
+      COMMENT '模块名称',
+      content          VARCHAR(3000)                      NULL
+      COMMENT '操作内容',
+      code_description VARCHAR(500)                       NULL
+      COMMENT '对应代码描述',
+      result           VARCHAR(50)                        NULL
+      COMMENT '操作结果'
       )
-      COMMENT '区域配置表'
+      COMMENT '系统操作日志'
       ENGINE = InnoDB;
 
-      -- auto-generated definition
-      CREATE TABLE item_template
-      (
-      id                 BIGINT AUTO_INCREMENT
-      COMMENT '主键'
-      PRIMARY KEY,
-      name               VARCHAR(50)                         NULL
-      COMMENT '模板名称',
-      creator_user_id    BIGINT                              NULL
-      COMMENT '创建者UserId',
-      creator_company_id BIGINT                              NULL
-      COMMENT '创建者公司ID',
-      buyer_company_id   BIGINT                              NULL
-      COMMENT '买家的企业ID',
-      seller_company_id  BIGINT                              NULL
-      COMMENT '卖家的企业ID',
-      gmt_create         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-      COMMENT '创建时间',
-      gmt_modify         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-      )
-      COMMENT '商品魔板'
-      ENGINE = InnoDB;
+
 
 
 
@@ -100,6 +90,127 @@
       <br/>
       <div>public interface {{table.pascalName}}Mapper {</div>
       <div>
+        import org.apache.ibatis.annotations.*;
+        <br/>
+        import java.util.List;
+        <br/>
+        <br/>
+        <div>public interface {{table.pascalName}}Mapper {</div>
+        <div>
+          <div class="querySql">
+            String querySql = " where 1=1 "
+            <div v-for="(column,index) in table.columns">
+              <template v-if="column.dataType === 'String'">
+                + " {{ _("if test = 'query."+column.camelName+" != null and query."+column.camelName+" != \"\" ' ") }} and {{column.name}} =
+                #{query.{{column.camelName}}} {{_("/if")}} "
+              </template>
+              <template v-if="column.dataType !== 'String'">
+                + " {{ _("if test = 'query."+column.camelName+" != null' ") }} and {{column.name}} =
+                #{query.{{column.camelName}}} {{_("/if")}} "
+              </template>
+            </div>
+            ;
+          </div>
+          <br/>
+          <div class="insertSingle">
+            <div>
+              @Options(useGeneratedKeys = true, keyProperty = "entity.{{table.primaryKeyCamel}}", keyColumn =
+              "{{table.primaryKey}}")
+              <br/>
+              @Insert("{{_("script")}} insert into {{table.name}} (
+              <span v-for="(column,index) in table.columns">
+              <template v-if="column.name !== table.primaryKey">
+                  {{column.name}}
+                  <span v-if="index !== (table.columns.length-1)">,</span>
+              </template>
+          </span>
+              <span>
+              ) values ( " + <br/>
+              "<span v-for="(column,index) in table.columns">
+                 <template v-if="column.name !== table.primaryKey">
+                        <span>#{entity.{{column.camelName}}}</span>
+                        <span v-if="index !== (table.columns.length-1)">,</span>
+                 </template>
+            </span>
+              )
+            </span>
+              {{_("/script")}}")
+            </div>
+            <div>
+              int singleInsert(@Param("entity") {{table.pascalName}} entity);
+            </div>
+          </div>
+          <br/>
+          <!--TODO 批量插入待优化-->
+          <div class="batchInsert">
+            @Insert("{{_('script')}} insert into {{table.name}} (
+            <template v-for="(column,index) in table.columns">
+              <template v-if="index !==0">
+                ,
+              </template>
+              {{column.name}}
+            </template>
+            ) values " + <br/>
+            "{{_("foreach collection='list' item='item' index='index' separator=',' ")}} " + <br/>
+            " (
+            <template v-for="(column,index) in table.columns">
+              <template v-if="index !==0">
+                ,
+              </template>
+              #{item.{{column.camelName}}}
+            </template>
+            )" + <br/>
+            "{{_("/foreach") + _("/script")}}")
+            <br/>
+            int batchInsert(@Param("list") List{{_(table.pascalName)}} {{table.camelName}});
+          </div>
+
+          <br/>
+          <div class="updateSingle">
+            @Update("{{_('script')}} update {{table.name}} "
+            <br/>
+            + "{{_('set')}}"
+            <template v-for="(column,index) in table.columns">
+              <template v-if="column.name !== table.primaryKey ">
+                <br/>
+                + " {{ _("if test = 'entity."+column.camelName+" != null'") }} {{column.name}} =
+                #{entity.{{column.camelName}}}, {{_("/if")}} "
+              </template>
+            </template>
+            <br/>
+            + "{{_('/set')}}"
+            <br/>
+            + "where {{table.primaryKey}} = #{entity.{{table.primaryKeyCamel}}} {{_('/script')}}")
+            <br/>
+            int update(@Param("entity") {{table.pascalName}} entity);
+          </div>
+          <br/>
+          <div class="deleteSingle">
+            @Delete("delete from {{table.name}} where {{table.primaryKey}} = #{id}")
+            <br/>
+            int deleteById(@Param("id") {{table.primaryKeyType}} {{table.primaryKeyCamel}});
+          </div>
+          <!--TODO   待加入批量删除功能-->
+          <br>
+          <div class="baseQuery">
+            @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} = #{id} {{ _('/script')}}")
+            <br>
+            {{table.pascalName}} get{{table.pascalName}}ById(@Param("id") {{table.primaryKeyType}}
+            {{table.primaryKeyCamel}});
+            <br>
+            <br>
+            @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} in " +
+            " {{_("foreach collection='ids' index='index' item='item' open='(' close=')' separator=',' ")}} " +
+            " #{item} " +
+            " {{_("/foreach")}} {{ _('/script')}}")
+            <br>
+            List<{{table.pascalName}}> get{{table.pascalName}}ByIds(@Param("ids") List<{{table.primaryKeyType}}> id);
+          </div>
+          <br>
+
+        </div>
+        <div>}</div>
+
         <div class="querySql">
           String querySql = " where 1=1 "
           <div v-for="(column,index) in table.columns">
