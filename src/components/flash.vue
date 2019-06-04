@@ -98,6 +98,9 @@
         <div>public interface {{table.pascalName}}Mapper {</div>
         <div>
           <div class="querySql">
+            <div>
+            // mybatis 特殊字符需要转换, {{tempStr}}
+            </div>
             String querySql = " where 1=1 "
             <div v-for="(column,index) in table.columns">
               <template v-if="column.dataType === 'String'">
@@ -559,6 +562,7 @@
         filter: {
           columns: ['gmt_create', 'gmt_modify']
         },
+        tempStr: '&lt;:<, &gt;:>, &lt;&gt;:<>, &amp;:&, &apos;:\', &quot;:"',
         show: {
           showClass: false,
           showMapper: false,
