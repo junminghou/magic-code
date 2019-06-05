@@ -21,30 +21,30 @@
 
     <div id="create_table_script" ref="create_table_script">
       -- auto-generated definition
-      CREATE TABLE sys_operation_log
+      CREATE TABLE st_person_region
       (
-      id               BIGINT AUTO_INCREMENT
+      id                 BIGINT AUTO_INCREMENT
       PRIMARY KEY,
-      gmt_create       DATETIME DEFAULT CURRENT_TIMESTAMP NULL
-      COMMENT '创建时间',
-      gmt_modify       DATETIME DEFAULT CURRENT_TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
-      user_id          BIGINT                             NULL
-      COMMENT '操作人ID',
-      user_name        VARCHAR(100)                       NULL
-      COMMENT '操作人姓名',
-      module_type      VARCHAR(50)                        NULL
-      COMMENT '模块类型',
-      module_name      VARCHAR(500)                       NULL
-      COMMENT '模块名称',
-      content          VARCHAR(3000)                      NULL
-      COMMENT '操作内容',
-      code_description VARCHAR(500)                       NULL
-      COMMENT '对应代码描述',
-      result           VARCHAR(50)                        NULL
-      COMMENT '操作结果'
+      dept_code          VARCHAR(100) DEFAULT '' NULL
+      COMMENT '部门Code',
+      dept_name          VARCHAR(100) DEFAULT '' NULL
+      COMMENT '部门名称',
+      big_region_code    VARCHAR(100) DEFAULT '' NULL
+      COMMENT '大区编码',
+      big_region_name    VARCHAR(100) DEFAULT '' NULL
+      COMMENT '大区名称',
+      big_region_manager VARCHAR(100) DEFAULT '' NULL
+      COMMENT '大区经理',
+      area_manager       VARCHAR(100) DEFAULT '' NULL
+      COMMENT '区域经理',
+      sales_user         VARCHAR(100) DEFAULT '' NULL
+      COMMENT '销售人员',
+      province_name      VARCHAR(100) DEFAULT '' NULL
+      COMMENT '省份名称'
       )
-      COMMENT '系统操作日志'
+      COMMENT '人员区域权限配置表'
       ENGINE = InnoDB;
+
 
 
 
@@ -104,7 +104,7 @@
             String querySql = " where 1=1 "
             <div v-for="(column,index) in table.columns">
               <template v-if="column.dataType === 'String'">
-                + " {{ _("if test = 'query."+column.camelName+" != null and query."+column.camelName+" != \"\" ' ") }} and {{column.name}} =
+                + " {{ _("if test = 'query."+column.camelName+" != null and query."+column.camelName+" != "+  quot + " ' ") }} and {{column.name}} =
                 #{query.{{column.camelName}}} {{_("/if")}} "
               </template>
               <template v-if="column.dataType !== 'String'">
@@ -563,6 +563,7 @@
           columns: ['gmt_create', 'gmt_modify']
         },
         tempStr: '&lt;:<, &gt;:>, &lt;&gt;:<>, &amp;:&, &apos;:\', &quot;:"',
+        quot: '\\"\\"',
         show: {
           showClass: false,
           showMapper: false,
