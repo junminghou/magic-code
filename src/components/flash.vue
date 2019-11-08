@@ -10,6 +10,7 @@
     <i-button @click="showAction('showSetter')">setter me!</i-button>
     <!--<i-button @click="showAction('showEnum')">enum me!</i-button>-->
     <i-button @click="showAction('showOther')">mock me!</i-button>
+    <i-button @click="showAction('showPythonSql')">python sql!</i-button>
 
 
     <span>{{msg}}</span>
@@ -20,34 +21,6 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-      -- auto-generated definition
-      CREATE TABLE st_person_region
-      (
-      id                 BIGINT AUTO_INCREMENT
-      PRIMARY KEY,
-      dept_code          VARCHAR(100) DEFAULT '' NULL
-      COMMENT '部门Code',
-      dept_name          VARCHAR(100) DEFAULT '' NULL
-      COMMENT '部门名称',
-      big_region_code    VARCHAR(100) DEFAULT '' NULL
-      COMMENT '大区编码',
-      big_region_name    VARCHAR(100) DEFAULT '' NULL
-      COMMENT '大区名称',
-      big_region_manager VARCHAR(100) DEFAULT '' NULL
-      COMMENT '大区经理',
-      area_manager       VARCHAR(100) DEFAULT '' NULL
-      COMMENT '区域经理',
-      sales_user         VARCHAR(100) DEFAULT '' NULL
-      COMMENT '销售人员',
-      province_name      VARCHAR(100) DEFAULT '' NULL
-      COMMENT '省份名称'
-      )
-      COMMENT '人员区域权限配置表'
-      ENGINE = InnoDB;
-
-
-
-
 
 
     </div>
@@ -122,11 +95,11 @@
               <br/>
               @Insert("{{_("script")}} insert into {{table.name}} (
               <span v-for="(column,index) in table.columns">
-              <template v-if="column.name !== table.primaryKey">
-                  {{column.name}}
-                  <span v-if="index !== (table.columns.length-1)">,</span>
-              </template>
-          </span>
+                <template v-if="column.name !== table.primaryKey">
+                    {{column.name}}
+                    <span v-if="index !== (table.columns.length-1)">,</span>
+                </template>
+              </span>
               <span>
               ) values ( " + <br/>
               "<span v-for="(column,index) in table.columns">
@@ -317,7 +290,7 @@
           <br>
           List<{{table.pascalName}}> get{{table.pascalName}}ByIds(@Param("ids") List<{{table.primaryKeyType}}> id);
         </div>
-        <br>
+        <>
 
       </div>
       <div>}</div>
@@ -537,6 +510,68 @@
         <br/>
         ]
       </div>
+
+      <div class="showMockJson">
+        {
+        <template v-for="(column,index) in table.columns">
+          <br/>
+          # {{column.description}}
+          <br/>
+          "{{column.name}}" : json_data["{{column.name}}"],
+        </template>
+        <br/>
+        }
+      </div>
+    </div>
+
+    <div v-if="show.showPythonSql">
+          <div class="insertSingle">
+            <div>
+
+              'insert into {{table.name}} (
+              <span v-for="(column,index) in table.columns">
+                <template v-if="column.name !== table.primaryKey">
+                    {{column.name}}
+                    <span v-if="index !== (table.columns.length-1)">,</span>
+                </template>
+              </span>
+              <span>
+              ) values (
+              <span v-for="(column,index) in table.columns">
+                 <template v-if="column.name !== table.primaryKey">
+                        <span>%s</span>
+                        <span v-if="index !== (table.columns.length-1)">,</span>
+                 </template>
+            </span>
+              )'
+            </span>
+            </br>
+            (
+            <span v-for="(column,index) in table.columns">
+                 <template v-if="column.name !== table.primaryKey">
+                        <span>data['{{column.name}}']</span>
+                        <span v-if="index !== (table.columns.length-1)">,</span>
+                 </template>
+            </span>
+            )
+            </div>
+
+          </div>
+
+        <div class="updateSingle">
+          update {{table.name}}
+            <br/>
+            set
+            <template v-for="(column,index) in table.columns">
+              <template v-if="column.name !== table.primaryKey ">
+                {{column.name}} = %s,
+              </template>
+            </template>
+            <br/>
+
+            <br/>
+        </div>
+
     </div>
   </div>
 </template>
@@ -546,6 +581,7 @@
   import {dataConvert} from '../service'
   import ISelect from "iview/src/components/select/select";
   import IOption from "iview/src/components/select/option";
+import { fail } from 'assert';
 
   export default {
     components: {
@@ -571,6 +607,7 @@
           showSetter: false,
           showEnum: false,
           showOther: false,
+          showPythonSql: false,
         },
         setter: {
           from: 'from',
