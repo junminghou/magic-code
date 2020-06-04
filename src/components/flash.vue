@@ -329,6 +329,7 @@
 
           <br/>
           <div class="updateSingle">
+            // 警告: 有外键关联的表ID记得不要更新，否则会出问题
             @Update("{{_('script')}} update {{table.name}} "
             <br/>
             + "{{_('set')}}"
