@@ -8,29 +8,16 @@
       </i-select>
       <div>
         <i-button @click="showAction(button_text)" style="width: 95px;">{{button_text}}</i-button>
-        <i-button @click="showAction('continue')" style="width: 95px;">continue</i-button>        
+        <i-button @click="showAction('continue')" style="width: 95px;">continue</i-button>
       </div>
-      <i-input style="width: 200px" placeholder="快捷键" v-model="shortcut_key" @keyup.s.native="doSomething('s')" @keyup.c.native="doSomething('c')" 
-                                    @keyup.space.native="doSomething('space')" @keyup.left.native="doSomething('left')" @keyup.right.native="doSomething('right')"
-                                    @keyup.up.native="doSomething('up')" @keyup.down.native="doSomething('down')"/>
+      <i-input style="width: 200px;margin-top: -12px; "
+               placeholder="快捷键" v-model="shortcut_key" @keyup.s.native="doSomething('s')" @keyup.c.native="doSomething('c')"
+               @keyup.space.native="doSomething('space')" @keyup.left.native="doSomething('left')" @keyup.right.native="doSomething('right')"
+               @keyup.up.native="doSomething('up')" @keyup.down.native="doSomething('down')"/>
     </div>
+
     <div ref="data_source" style="display: none;">
-      他需要来这么早吗
-      他们需要填表吗
-      我需要来吗
-      他需要这么做吗
-      你不需要再做它了
-      你不需要来
-      他不需要知道
-      你不需要买这些东西
-      他需要知道这些
-      你们需要每天学习
-      我们需要买很多东西
-      我们需要告诉他
-      你的头发需要洗了
-      这桌子需要喷漆了
-      你的房子需要装修了
-      你的作业需要做了
+
     </div>
   </div>
 </template>
@@ -46,6 +33,8 @@ export default {
   data() {
     return {
       model: 1,
+      only_show_stars: true,
+      interval_line: 4,
       percentage: "",
       show_text: "",
       button_text: "start",
@@ -53,8 +42,7 @@ export default {
       interval_second: 5,
       value: 0,
       data_source: [],
-      interval_line: 4,
-      every_line_show_times: 3,      
+      every_line_show_times: 3,
       pause_points: [],
       sections: [],
       sections_selected: null,
@@ -64,10 +52,7 @@ export default {
     };
   },
   mounted() {
-    const innerText = this.$refs.data_source.innerText;
-    let text_array = innerText.split("\n").filter((t) => {
-      return !junming.IsNullOrEmpty(t.trim());
-    });
+    let text_array = this.get_data_source();
     const for_length = Math.ceil(text_array.length / this.interval_line);
     const latest_data = [];
 
@@ -95,7 +80,7 @@ export default {
         current_no =
           current_no > text_array.length ? text_array.length : current_no;
         let last_data = "";
-        for (let hh = 0; hh < this.every_line_show_times; hh++) {          
+        for (let hh = 0; hh < this.every_line_show_times; hh++) {
           if(hh > 0){
             latest_data.push(last_data);
           }
@@ -136,8 +121,8 @@ export default {
       if (is_pause) {
         this.showAction("pause");
       }
-      if (!this.sync_lock) {
-        this.set_show_text(current_value + 1);    
+      if (!this.is_lock) {
+        this.set_show_text(current_value + 1);
       }
     },
     doSomething(key_word) {
@@ -147,27 +132,27 @@ export default {
         this.showAction("continue");
       } else if(key_word == "space") {
         this.showAction("pause");
-      } else if (key_word == "left") {      
-        if (this.is_start == true) {    
+      } else if (key_word == "left") {
+        if (this.is_start == true) {
           this.showAction("pause");
-          this.set_show_text(this.value - 1);                        
+          this.set_show_text(this.value - 1);
           this.showAction("continue");
         } else {
-          this.set_show_text(this.value - 1);   
+          this.set_show_text(this.value - 1);
         }
-      } else if (key_word == "right") {                
-         if (this.is_start == true) {    
+      } else if (key_word == "right") {
+         if (this.is_start == true) {
           this.showAction("pause");
-          this.set_show_text(this.value + 1);                        
+          this.set_show_text(this.value + 1);
           this.showAction("continue");
         } else {
-          this.set_show_text(this.value + 1);   
+          this.set_show_text(this.value + 1);
         }
       }
       this.shortcut_key = "";
     },
     set_show_text(current_value) {
-      // is_timer = (is_timer == undefined ? false : is_timer);      
+      // is_timer = (is_timer == undefined ? false : is_timer);
       if(this.data_source == null || this.data_source.length == 0) {
         return;
       }
@@ -175,16 +160,16 @@ export default {
         current_value = 0;
       } else if (current_value > this.data_source.length - 1){
         current_value = this.data_source.length - 1;
-      }     
+      }
       this.value = current_value;
       this.setter_section();
       this.show_text = this.data_source[current_value];
       this.percentage =
-        ((current_value / (this.data_source.length - 1)) * 100).toFixed() + " %";        
+        ((current_value / (this.data_source.length - 1)) * 100).toFixed() + " %";
     },
     showAction(name) {
       if (name === "start") {
-        this.is_lock = false;        
+        this.is_lock = false;
         if(this.sections_selected == 0) {
             this.value = 0
         } else {
@@ -195,12 +180,12 @@ export default {
         this.is_start = true;
       } else if (name === "pause") {
         this.is_start = false;
-        this.is_lock = true;        
+        this.is_lock = true;
         clearInterval(this.timer);
-        this.button_text = "start";        
+        this.button_text = "start";
       } else if (name === 'continue') {
-           this.is_lock = false;        
-           if (this.button_text == "start") {                      
+           this.is_lock = false;
+           if (this.button_text == "start") {
             this.timer = setInterval(this.get, this.interval_second * 1000);
             this.button_text = "pause";
             this.is_start = true;
@@ -216,6 +201,25 @@ export default {
           }
       }
       this.sections_selected = current_section;
+    },
+    get_data_source() {
+      const innerText = this.$refs.data_source.innerText;
+      const only_show_starts = this.only_show_stars;
+      let result = [];
+      innerText.split("\n").forEach(element => {
+        element = element.trim();
+        if(!junming.IsNullOrEmpty(element)) {
+          if(only_show_starts) {
+              if(element.indexOf("*") > -1) {
+                result.push(element.replace(/\*/g, ""));
+              }
+          } else {
+            result.push(element.replace(/\*/g, ""));
+          }
+        }
+      });
+
+      return result;
     }
   },
   beforeDestroy() {
