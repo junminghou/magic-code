@@ -11,8 +11,10 @@
         <i-button @click="showAction('continue')" style="width: 95px;">continue</i-button>
       </div>
       <i-input style="width: 200px;margin-top: -12px; "
-               placeholder="快捷键" v-model="shortcut_key" @keyup.s.native="doSomething('s')" @keyup.c.native="doSomething('c')"
-               @keyup.space.native="doSomething('space')" @keyup.left.native="doSomething('left')" @keyup.right.native="doSomething('right')"
+               placeholder="快捷操作 s:start c:continue" v-model="shortcut_key" @keyup.s.native="doSomething('s')"
+               @keyup.c.native="doSomething('c')"
+               @keyup.space.native="doSomething('space')"
+               @keyup.left.native="doSomething('left')" @keyup.right.native="doSomething('right')"
                @keyup.up.native="doSomething('up')" @keyup.down.native="doSomething('down')"/>
     </div>
 
