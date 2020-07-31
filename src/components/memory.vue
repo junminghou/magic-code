@@ -19,7 +19,45 @@
     </div>
 
     <div ref="data_source" style="display: none;">
-
+      你怎么能这么说呢
+      我应该怎么办
+      他们一定在看电视
+      我能（可以）为你做什么呢
+      他们一定在家
+      他会是谁呢
+      你敢告诉他吗
+      我该说什么呢
+      我们一定得告诉他吗
+      你怎么敢这么说
+      （它）会是谁呢
+      你能把窗户关一下吗
+      你能跑多快
+      他一定有很多钱
+      他会是对的吗
+      你敢一个人去北京吗
+      这车需要洗吗
+      他会怎么跟她说这件事呢
+      你想点什么
+      我想点鸭子
+      他会在干什么呢
+      你为什么不告诉他呢
+      这会是什么呢
+      你能回避一下吗
+      他必须去北京吗
+      那个高个子男人会是谁呢
+      这辆车会多少钱呢
+      他应该交什么样的朋友
+      我该什么时候给你打电话呢
+      你一定得走吗
+      我为什么看不见他
+      我为什么不能见他
+      我怎么能从这里到天安门
+      你会开车吗
+      你能开会儿车吗
+      你为什么学不好英语
+      我在哪里能找到他
+      你什么时候才能告诉我
+      这会是真的吗
     </div>
   </div>
 </template>
@@ -35,8 +73,8 @@ export default {
   data() {
     return {
       model: 1,
-      only_show_stars: true,
-      interval_line: 4,
+      only_show_stars: false,
+      interval_line: 5,
       percentage: "",
       show_text: "",
       button_text: "start",
@@ -122,6 +160,8 @@ export default {
       });
       if (is_pause) {
         this.showAction("pause");
+        this.set_show_text(current_value + 1);
+        this.notice();
       }
       if (!this.is_lock) {
         this.set_show_text(current_value + 1);
@@ -222,6 +262,12 @@ export default {
       });
 
       return result;
+    },
+    notice() {
+      this.$Notice.success({
+        title: 'Good Job!',
+        desc: ''
+      });
     }
   },
   beforeDestroy() {
