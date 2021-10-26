@@ -21,8 +21,6 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-
-
 create table flow_task_user
 (
     id            int unsigned auto_increment
