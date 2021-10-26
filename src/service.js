@@ -13,6 +13,7 @@ export const dataConvert = {
   getTable(element, filterColumns) {
     let create = "CREATE TABLE";
     let comment = "COMMENT";
+    let lowercaseComment = "comment";
     let primaryKey = "PRIMARY KEY";
     let constraint = "CONSTRAINT";
     let decimal = "DECIMAL";
@@ -20,12 +21,21 @@ export const dataConvert = {
     let tables = [];
     element.split(';').forEach(function (divContent) {
       let inner = divContent.replace('\n', '');
-      let tableName = dataConvert.getDuringStr(inner, create, "(");
+      let tableName = "";
+      if(inner.indexOf(create) > -1) {
+        tableName = dataConvert.getDuringStr(inner, create, "(");
+      } else {
+        tableName = dataConvert.getDuringStr(inner, create.toLocaleLowerCase(), "(");
+      }
       let columnBody = dataConvert.getDuringStr(inner, "(", ")", true);
       let temp = inner.substring(inner.lastIndexOf(")"));
       let tableDesc = "";
+      
+      if (temp.indexOf(lowercaseComment) > -1) {
+        comment = lowercaseComment;
+      }
       if (temp.indexOf(comment) > -1) {
-        tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);
+        tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);  
       }
 
       let table = {name: tableName, description: tableDesc, columns: []};
@@ -65,6 +75,7 @@ export const dataConvert = {
         }
         let column = {};
         value = value.trim();
+        value = value.replace('unsigned','');
         let columnName = dataConvert.getDuringStr(value, null, " ");
         if (columnName === '') {
           return;
@@ -86,7 +97,7 @@ export const dataConvert = {
         column.camelName = dataConvert.getCamelName(column.pascalName);
 
         table.columns.push(column);
-        if (value.indexOf(primaryKey) > -1) {
+        if (value.indexOf(primaryKey) > -1 || value.indexOf(primaryKey.toLocaleLowerCase()) > -1) {
           table.primaryKey = columnName;
           table.primaryKeyType = dataType;
           table.primaryKeyCamel = column.camelName;
@@ -108,22 +119,22 @@ export const dataConvert = {
     return str.toLowerCase().replace(/(_|^)[a-z]/g, (L) => L.toUpperCase());
   },
   getDataType(value) {
-    if (value.indexOf(dataType.java.String) > -1) {
+    if (value.indexOf(dataType.java.String) > -1 || value.indexOf(dataType.java.String.toLocaleLowerCase()) > -1 ) {
       return "String";
     }
-    if (value.indexOf(dataType.java.Long) > -1) {
+    if (value.indexOf(dataType.java.Long) > -1 || value.indexOf(dataType.java.Long.toLocaleLowerCase()) > -1 ) {
       return "Long";
     }
-    if (value.indexOf(dataType.java.Integer) > -1) {
+    if (value.indexOf(dataType.java.Integer) > -1 || value.indexOf(dataType.java.Integer.toLocaleLowerCase()) > -1) {
       return "Integer";
     }
-    if (value.indexOf(dataType.java.Date) > -1) {
+    if (value.indexOf(dataType.java.Date) > -1 || value.indexOf(dataType.java.Date.toLocaleLowerCase()) > -1) {
       return "Date";
     }
-    if (value.indexOf(dataType.java.Timestamp) > -1) {
+    if (value.indexOf(dataType.java.Timestamp) > -1 || value.indexOf(dataType.java.Timestamp.toLocaleLowerCase()) > -1) {
       return "Date";
     }
-    if (value.indexOf(dataType.java.BigDecimal) > -1) {
+    if (value.indexOf(dataType.java.BigDecimal) > -1 || value.indexOf(dataType.java.BigDecimal.toLocaleLowerCase()) > -1) {
       return "BigDecimal";
     }
     return "String";

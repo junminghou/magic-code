@@ -22,6 +22,25 @@
 
     <div id="create_table_script" ref="create_table_script">
 
+
+create table flow_task_user
+(
+    id            int unsigned auto_increment
+        primary key,
+    task_id       int              default 0                    not null,
+    app_type      tinyint unsigned default '0'                  not null comment 'APP类型 0:轻抖 1:轻草提词器 2:轻草',
+    user_id       int unsigned     default '0'                  not null comment '用户id',
+    amount        int unsigned     default '0'                  not null comment '佣金金额',
+    join_time     int unsigned     default '0'                  not null comment '参加时间',
+    finish_status tinyint unsigned default '0'                  not null comment '1预估，2已赚，3退回',
+    finish_time   int unsigned     default '0'                  not null comment '完成或退回',
+    create_time   datetime(3)      default CURRENT_TIMESTAMP(3) not null,
+    update_time   datetime(3)      default CURRENT_TIMESTAMP(3) not null,
+    is_deleted    tinyint unsigned default '0'                  not null
+) comment '任务发布基础表'
+
+
+
     </div>
 
     <div id="publicClass" v-if="show.showClass">
@@ -29,6 +48,7 @@
         <div>
           public class {{table.pascalName}} {
         </div>
+        <br/>
         <div v-for="column in table.columns">
           /** <br>
           * {{column.description}}<br>
@@ -290,7 +310,7 @@
           <br>
           List<{{table.pascalName}}> get{{table.pascalName}}ByIds(@Param("ids") List<{{table.primaryKeyType}}> id);
         </div>
-        <>
+        
 
       </div>
       <div>}</div>
@@ -586,7 +606,7 @@
 
 
 <script>
-  import {dataConvert} from '../service'
+  import {dataConvert} from '../service.js'
   import ISelect from "iview/src/components/select/select";
   import IOption from "iview/src/components/select/option";
 import { fail } from 'assert';
@@ -679,5 +699,9 @@ import { fail } from 'assert';
 
   .setterContent {
     margin-top: 10px;
+  }
+
+  #publicClass,#publicMapper,#publicService{
+    margin: 10px;
   }
 </style>
