@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import flash from '@/components/flash'
 import beautiful from '@/components/beautiful'
 import memory from '@/components/memory'
-
+import xman from '@/components/xman'
 
 Vue.use(Router)
 
@@ -23,6 +23,11 @@ export default new Router({
       path: '/memory',
       name: 'memory',
       component: memory
+    },
+    {
+      path: '/xman',
+      name: 'xman',
+      component: xman
     }
   ]
 })
