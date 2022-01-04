@@ -5,7 +5,7 @@
     </i-select>
 
     <i-button @click="showAction('showClass')">class me!</i-button>
-    <i-button @click="showAction('showMapper')">mapper me!</i-button>
+    <i-button @click="showAction('showMapper')">manager me!</i-button>
     <i-button @click="showAction('showService')">service me!</i-button>
     <i-button @click="showAction('showSetter')">setter me!</i-button>
     <!--<i-button @click="showAction('showEnum')">enum me!</i-button>-->
@@ -22,7 +22,6 @@
 
     <div id="create_table_script" ref="create_table_script">
 
-
     </div>
 
     <div id="publicClass" v-if="show.showClass">
@@ -35,8 +34,6 @@
           /** <br>
           * {{column.description}}<br>
           */<br>
-          @ExcelProperty(value = "{{column.description}}")<br>
-          @JSONField(serializeUsing = MoneyShowSerializer.class)<br>
           <span> private {{column.dataType}} {{column.camelName}};</span>
         </div>
 
@@ -59,37 +56,19 @@
     </div>
 
     <div id="publicMapper" v-if="show.showMapper">
-      import org.apache.ibatis.annotations.*;
-      <br/>
-      import java.util.List;
-      <br/>
-      <br/>
-      <div>public interface {{table.pascalName}}Mapper {</div>
-      <div>
-        import org.apache.ibatis.annotations.*;
         <br/>
         import java.util.List;
+        <br/><br/>
+        @Service
+      <br/>        
+        @Slf4j
+      <div>public interface {{table.pascalName}}ManagerImpl implements {{table.pascalName}}Manager {</div>
+      <div>
         <br/>
-        <br/>
-        <div>public interface {{table.pascalName}}Mapper {</div>
+        @Autowired<br/>
+        private CourseListMapper courseListMapper; 
+        <br/>       
         <div>
-          <div class="querySql">
-            <div>
-            // mybatis 特殊字符需要转换, {{tempStr}}
-            </div>
-            String querySql = " where 1=1 "
-            <div v-for="(column,index) in table.columns">
-              <template v-if="column.dataType === 'String'">
-                + " {{ _("if test = 'query."+column.camelName+" != null and query."+column.camelName+" != "+  quot + " ' ") }} and {{column.name}} =
-                #{query.{{column.camelName}}} {{_("/if")}} "
-              </template>
-              <template v-if="column.dataType !== 'String'">
-                + " {{ _("if test = 'query."+column.camelName+" != null' ") }} and {{column.name}} =
-                #{query.{{column.camelName}}} {{_("/if")}} "
-              </template>
-            </div>
-            ;
-          </div>
           <br/>
           <div class="insertSingle">
             <div>
@@ -405,12 +384,7 @@
       <br/>
       <div class="setterContent">
         <template v-for="column in table.columns">
-          {{setter.to}}.set{{column.pascalName}}(defautValue({{setter.to}}.get{{column.pascalName}}()) + defautValue({{setter.from}}.get{{column.pascalName}}()));
-          <br/>
-        </template>
-        <br/>
-         <template v-for="column in table.columns">
-          {{setter.to}}.set{{column.pascalName}}(fenToYuan({{setter.from}}.get{{column.pascalName}}()));
+          {{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());
           <br/>
         </template>
         <br/>
@@ -480,12 +454,12 @@
       }
     </div>
 
-    <div v-if="show.showOther">
+    <div id="showOther" v-if="show.showOther">
       <div class="showMockJson">
         {
         <template v-for="(column,index) in table.columns">
           <br/>
-          "{{column.camelName}}" : 222,   // {{column.description}}
+          "{{column.camelName}}" : null,      // {{ column.description }}
         </template>
         <br/>
         }
@@ -595,7 +569,7 @@
 
 
 <script>
-  import {dataConvert} from '../javaService.js'
+  import {dataConvert} from '../service.js'
   import ISelect from "iview/src/components/select/select";
   import IOption from "iview/src/components/select/option";
 import { fail } from 'assert';
@@ -690,7 +664,7 @@ import { fail } from 'assert';
     margin-top: 10px;
   }
 
-  #publicClass,#publicMapper,#publicService{
+  #publicClass,#publicMapper,#publicService,#showOther{
     margin: 10px;
   }
 </style>

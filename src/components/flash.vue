@@ -21,23 +21,6 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-create table flow_task_user
-(
-    id            int unsigned auto_increment
-        primary key,
-    task_id       int              default 0                    not null,
-    app_type      tinyint unsigned default '0'                  not null comment 'APP类型 0:轻抖 1:轻草提词器 2:轻草',
-    user_id       int unsigned     default '0'                  not null comment '用户id',
-    amount        int unsigned     default '0'                  not null comment '佣金金额',
-    join_time     int unsigned     default '0'                  not null comment '参加时间',
-    finish_status tinyint unsigned default '0'                  not null comment '1预估，2已赚，3退回',
-    finish_time   int unsigned     default '0'                  not null comment '完成或退回',
-    create_time   datetime(3)      default CURRENT_TIMESTAMP(3) not null,
-    update_time   datetime(3)      default CURRENT_TIMESTAMP(3) not null,
-    is_deleted    tinyint unsigned default '0'                  not null
-) comment '任务发布基础表'
-
-
 
     </div>
 
@@ -419,6 +402,8 @@ create table flow_task_user
       <br/>
       <div class="setterContent">
         <template v-for="column in table.columns">
+          // {{column.description}}
+          <br/>
           {{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());
           <br/>
         </template>
@@ -489,12 +474,12 @@ create table flow_task_user
       }
     </div>
 
-    <div v-if="show.showOther">
+    <div id="showOther" v-if="show.showOther">
       <div class="showMockJson">
         {
         <template v-for="(column,index) in table.columns">
           <br/>
-          "{{column.camelName}}" : null,
+          "{{column.camelName}}" : null,      // {{ column.description }}
         </template>
         <br/>
         }
@@ -699,7 +684,7 @@ import { fail } from 'assert';
     margin-top: 10px;
   }
 
-  #publicClass,#publicMapper,#publicService{
+  #publicClass,#publicMapper,#publicService,#showOther{
     margin: 10px;
   }
 </style>

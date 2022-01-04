@@ -4,6 +4,7 @@ import flash from '@/components/flash'
 import beautiful from '@/components/beautiful'
 import memory from '@/components/memory'
 import xman from '@/components/xman'
+import qingcao from '@/components/qingcao'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/xman',
       name: 'xman',
       component: xman
+    },
+    {
+      path: '/qingcao',
+      name: 'qingcao',
+      component: qingcao
     }
   ]
 })
