@@ -10,6 +10,30 @@ const dataType = {
 };
 
 export const dataConvert = {
+  getMethod(divContent, filterColumns) {
+    let inner = divContent.replace('\n', '').trim();
+    let columnBody = dataConvert.getDuringStr(inner, "(", ")", false);
+    let methodName = dataConvert.getDuringStr(inner, " ", "(", false);
+    let returnType = dataConvert.getDuringStr(inner, "", " ", false);
+    let methodOutType = this.getJavaType(returnType);
+    
+    let arrayColumns = columnBody.split(',');
+    let methodInParams = [];
+    arrayColumns.forEach(function (value) {
+      if (value === "") return;
+
+      let fields = value.trim().split(' ');
+      let field = {};
+      field.type = fields[0];
+      field.name = fields[1];
+      methodInParams.push({paramType: field.type, paramName: field.name});
+    });
+
+
+    let methodDefinition= { methodName: methodName, methodOutType: methodOutType, methodInParams: methodInParams};
+    console.log(methodDefinition);
+    return methodDefinition;
+  },
   getTable(divContent, filterColumns) {
     let create = "class";
     let comment = "/**";
@@ -113,6 +137,42 @@ export const dataConvert = {
       return "BigDecimal";
     }
     return "String";
+  },
+  getJavaType(value) {
+    let methodOutType = {isBaseType:true,isReferenceType:false,isList:false,outTypeValue:''};
+
+    if (value.indexOf("List<") > -1) {
+      methodOutType.isReferenceType = true;
+      methodOutType.isList = true;
+      methodOutType.isBaseType = false;
+    }
+    
+    let hasBaseType = false;
+    if (value.indexOf("String") > -1 || value.indexOf("string") > -1 ) {    
+      methodOutType.outTypeValue = "String";
+      hasBaseType = true;
+    }
+    if (value.indexOf("Long") > -1 || value.indexOf("long") > -1 ) {
+      methodOutType.outTypeValue = "Long";
+      hasBaseType = true;
+    }
+    if (value.indexOf("Integer") > -1 || value.indexOf("int") > -1) {
+      methodOutType.outTypeValue = "Integer";
+      hasBaseType = true;
+    }
+    if (value.indexOf("Boolean") > -1 || value.indexOf("boolean") > -1) {
+      methodOutType.outTypeValue = "Boolean";
+      hasBaseType = true;
+    }
+    if (value.indexOf("BigDecimal") > -1) {
+      methodOutType.outTypeValue = "BigDecimal";
+      hasBaseType = true;
+    }
+
+    if(!hasBaseType) {
+      methodOutType.outTypeValue = this.getDuringStr(value,"<", ">");
+    }
+    return methodOutType;
   },
   getDuringStr(source, beginStr, endStr, isLastIndexOf) {
     let beginLength = beginStr ? beginStr.length : 0;

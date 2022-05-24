@@ -15,14 +15,14 @@
 
     <span>{{msg}}</span>
 
-    <div style="display: block;">
-        ssss
+    <div style="display: none;">
+      
 
     </div>
 
     <div id="create_table_script" ref="create_table_script">
       
-
+    List{{_("SelfBuyOrderListDTO")}} myCommissionOrderList(Long userId, Integer commissionStatus, Integer pageIndex, Integer pageSize);
 
     </div>
 
@@ -618,7 +618,7 @@ import { fail } from 'assert';
       IOption,
       ISelect
     },
-    name: 'flash',
+    name: 'method',
     data() {
       return {
         visible: false,
@@ -653,7 +653,8 @@ import { fail } from 'assert';
       };
     },
     mounted() {
-      this.tables = dataConvert.getTable(this.$refs.create_table_script.innerText, this.filter.columns);
+      // console.log( this.$refs.create_table_script.innerText );
+      this.tables = dataConvert.getMethod(this.$refs.create_table_script.innerText, this.filter.columns);
       this.table = this.tables[0];
     },
     methods: {
