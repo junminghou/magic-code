@@ -172,6 +172,7 @@ export const dataConvert = {
     if(!hasBaseType) {
       methodOutType.outTypeValue = this.getDuringStr(value,"<", ">");
     }
+    methodOutType.outTypeSource = value;
     return methodOutType;
   },
   getDuringStr(source, beginStr, endStr, isLastIndexOf) {
