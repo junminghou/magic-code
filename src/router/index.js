@@ -5,6 +5,7 @@ import beautiful from '@/components/beautiful'
 import memory from '@/components/memory'
 import xman from '@/components/xman'
 import qingcao from '@/components/qingcao'
+import method from '@/components/method'
 
 Vue.use(Router)
 
@@ -34,6 +35,11 @@ export default new Router({
       path: '/qingcao',
       name: 'qingcao',
       component: qingcao
+    },
+    {
+      path: '/method',
+      name: 'method',
+      component: method
     }
   ]
 })
