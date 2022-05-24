@@ -15,8 +15,8 @@
 
     <span>{{msg}}</span>
 
-    <div style="display: none;">
-
+    <div style="display: block;">
+        ssss
 
     </div>
 

@@ -22,6 +22,7 @@
 
     <div id="create_table_script" ref="create_table_script">
 
+
     </div>
 
     <div id="publicClass" v-if="show.showClass">
