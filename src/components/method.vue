@@ -29,6 +29,9 @@
 
       <div class="publicClass BusinessOfService">
         <pre>BusinessOfService</pre>
+       @Autowired <br/>
+       private {{ toBusiness(member.memberType) }} {{toBusiness(member.memberName)}};
+       
         <!-- 方法头 -->
         <div>
               @Override <br/>
@@ -72,6 +75,9 @@
         <pre>Service</pre>
         <!-- 方法头 -->
         <div>
+          @Autowired <br/>
+          private {{ toBusiness(member.memberType) }} {{toBusiness(member.memberName)}}; <br/>
+
               @Override <br/>
               <span> public {{toDTO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
                
@@ -122,6 +128,8 @@
         <pre>TarzanManager</pre>
         <!-- 方法头 -->
         <div>
+              @DubboReference <br/>
+              private {{ toService(member.memberType) }} {{toService(member.memberName)}}; <br/>
               @Override <br/>
               <span> public {{toBO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
                
@@ -171,6 +179,8 @@
         <pre>TarzanBusiness</pre>
         <!-- 方法头 -->
         <div>
+              @Autowired <br/>
+              private {{ toManager(member.memberType) }} {{toManager(member.memberName)}}; <br/>
               @Override <br/>
               <span> public {{toVO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
                
