@@ -12,6 +12,13 @@ const dataType = {
 };
 
 export const dataConvert = {
+  getMemberVariable(divContent){
+    let inner = divContent.replace('\n', '').trim();
+    let member = dataConvert.getDuringStr(inner, "private", ";", false);  
+
+    let definition = member.split(' ');
+    return { memberType: definition[0], memberName: definition[1] }
+  },
   getMethod(divContent, filterColumns) {
     let inner = divContent.replace('\n', '').trim();
     let columnBody = dataConvert.getDuringStr(inner, "(", ")", false);
