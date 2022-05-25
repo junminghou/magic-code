@@ -13,6 +13,7 @@
     <div style="display: none;">
       
     List{{_("SelfBuyOrderListDTO")}} myCommissionOrderList(Long userId, Integer commissionStatus, Integer pageIndex, Integer pageSize);
+    ServiceResultBO{{_("FollowRoomPreCheckResBO")}} applyPreCheck(FollowRoomApplyPreCheckRequestBO checkRequest);
     </div>
 
     <div id="class_member_script" ref="class_member_script">
@@ -20,9 +21,7 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-      
-    ServiceResultBO{{_("FollowRoomPreCheckResBO")}} applyPreCheck(FollowRoomApplyPreCheckRequestBO checkRequest);
-
+      ServiceResultVO{{_("Boolean")}} bindFollowAccount(FollowRoomBindFollowAccountBO accountBO);
     </div>
 
     <div id="publicClass" v-if="show.showClass">
@@ -228,7 +227,7 @@
                   <template v-for="(column,index) in table.methodInParams">
                     {{column.paramName}}
                     <template v-if="index !== (table.methodInParams.length-1)">,</template>
-                  </template>));
+                  </template>), {{table.methodOutType.outTypeValue}}.class);
                 </template>
                 
             </template>    
