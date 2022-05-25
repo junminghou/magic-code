@@ -11,6 +11,7 @@
     <!--<i-button @click="showAction('showEnum')">enum me!</i-button>-->
     <i-button @click="showAction('showOther')">mock me!</i-button>
     <i-button @click="showAction('showPythonSql')">python sql!</i-button>
+    <i-button @click="clearSelectFields()">clearClickFiled</i-button>
 
 
     <span>{{msg}}</span>
@@ -20,7 +21,40 @@
 
     </div>
 
+    <div id="columns" style=" margin: 10px;">
+         <template v-for="column in table.columns" >          
+            <div style='cursor:pointer; width: 200px; display: inline-block;' @click="pushField(column)">
+            {{column.pascalName}}
+            </div>
+        </template>
+    </div>
+
     <div id="create_table_script" ref="create_table_script">
+create table follow_room_member
+(
+    id                      bigint unsigned auto_increment
+        primary key,
+    app_type                int unsigned     default 0                    not null comment 'app类型 0 轻抖APP 1 轻草提词器 2 轻草',
+    user_id                 bigint unsigned  default 0                    not null comment '用户',
+    room_id                 bigint unsigned  default 0                    not null comment '房间Id',
+    join_fee                int(10)          default 0                    not null comment '加入费用',
+    is_owner                tinyint(1)       default 0                    not null comment '是否房主',
+    invite_user_id          bigint           default 0                    not null comment '邀请人',
+    account_id              bigint unsigned  default 0                    not null comment '媒体账号表id',
+    work_id                 bigint unsigned  default 0                    not null comment '作品id',
+    join_times              int(11) unsigned default 1                    not null comment '该房间加入次数',
+    pay_type                int(11) unsigned default 1                    not null comment '支付类型, 0: 免费, 1: 付费',
+    join_status             int(11) unsigned default 0                    not null comment '加入的状态, 0: 加入中, 1: 加入成功, 2: 失效或取消',
+    pre_join_time           int unsigned     default 0                    not null comment '预检查时的加入时间',
+    join_time               int unsigned     default 0                    not null comment '成功的加入时间',
+    failure_time            int(11) unsigned default 0                    not null comment '失效或取消时间',
+    last_remind_follow_time int unsigned     default 0                    not null comment '最后被催关时间',
+    is_follow_all           tinyint unsigned default 0                    not null comment '是否关注房内所有人',
+    create_time             datetime(3)      default CURRENT_TIMESTAMP(3) not null,
+    update_time             datetime(3)      default CURRENT_TIMESTAMP(3) not null on update CURRENT_TIMESTAMP(3),
+    is_deleted              tinyint unsigned default 0                    not null
+)
+    comment '互关房用户参与表';
 
     </div>
 
@@ -55,229 +89,135 @@
       </div>
     </div>
 
-    <div id="publicMapper" v-if="show.showMapper">
-        <br/>
-        import java.util.List;
-        <br/><br/>
-        @Service
-      <br/>        
-        @Slf4j
-      <div>public interface {{table.pascalName}}ManagerImpl implements {{table.pascalName}}Manager {</div>
-      <div>
-        <br/>
-        @Autowired<br/>
-        private CourseListMapper courseListMapper; 
-        <br/>       
-        <div>
-          <br/>
-          <div class="insertSingle">
-            <div>
-              @Options(useGeneratedKeys = true, keyProperty = "entity.{{table.primaryKeyCamel}}", keyColumn =
-              "{{table.primaryKey}}")
-              <br/>
-              @Insert("{{_("script")}} insert into {{table.name}} (
-              <span v-for="(column,index) in table.columns">
-                <template v-if="column.name !== table.primaryKey">
-                    {{column.name}}
-                    <span v-if="index !== (table.columns.length-1)">,</span>
-                </template>
-              </span>
-              <span>
-              ) values ( " + <br/>
-              "<span v-for="(column,index) in table.columns">
-                 <template v-if="column.name !== table.primaryKey">
-                        <span>#{entity.{{column.camelName}}}</span>
-                        <span v-if="index !== (table.columns.length-1)">,</span>
-                 </template>
-            </span>
-              )
-            </span>
-              {{_("/script")}}")
-            </div>
-            <div>
-              int singleInsert(@Param("entity") {{table.pascalName}} entity);
-            </div>
-          </div>
-          <br/>
-          <!--TODO 批量插入待优化-->
-          <div class="batchInsert">
-            @Insert("{{_('script')}} insert into {{table.name}} (
-            <template v-for="(column,index) in table.columns">
-              <template v-if="index !==0">
-                ,
-              </template>
-              {{column.name}}
-            </template>
-            ) values " + <br/>
-            "{{_("foreach collection='list' item='item' index='index' separator=',' ")}} " + <br/>
-            " (
-            <template v-for="(column,index) in table.columns">
-              <template v-if="index !==0">
-                ,
-              </template>
-              #{item.{{column.camelName}}}
-            </template>
-            )" + <br/>
-            "{{_("/foreach") + _("/script")}}")
-            <br/>
-            int batchInsert(@Param("list") List{{_(table.pascalName)}} {{table.camelName}});
-          </div>
+  <div id="publicMapper" v-if="show.showMapper">
+     
+    <template>
+        @Override<br/>
+        public List{{_(table.pascalName+"BO")}} findList(
+          <template v-for="(column,index) in selectFields">
+            {{column.dataType}} {{column.camelName}}
+            <template v-if="index !== (selectFields.length-1)">,</template>
+          </template>) {<br/>
+          
+          <template v-for="column in selectFields">
 
-          <br/>
-          <div class="updateSingle">
-            // 警告: 有外键关联的表ID记得不要更新，否则会出问题
-            @Update("{{_('script')}} update {{table.name}} "
-            <br/>
-            + "{{_('set')}}"
-            <template v-for="(column,index) in table.columns">
-              <template v-if="column.name !== table.primaryKey ">
-                <br/>
-                + " {{ _("if test = 'entity."+column.camelName+" != null'") }} {{column.name}} =
-                #{entity.{{column.camelName}}}, {{_("/if")}} "
-              </template>
+            <template v-if="column.dataType == 'Long'">
+              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+              &emsp;&emsp;&emsp;&emsp;return Collections.emptyList(); <br/>
+              &emsp;&emsp;} <br/>
             </template>
-            <br/>
-            + "{{_('/set')}}"
-            <br/>
-            + "where {{table.primaryKey}} = #{entity.{{table.primaryKeyCamel}}} {{_('/script')}}")
-            <br/>
-            int update(@Param("entity") {{table.pascalName}} entity);
-          </div>
-          <br/>
-          <div class="deleteSingle">
-            @Delete("delete from {{table.name}} where {{table.primaryKey}} = #{id}")
-            <br/>
-            int deleteById(@Param("id") {{table.primaryKeyType}} {{table.primaryKeyCamel}});
-          </div>
-          <!--TODO   待加入批量删除功能-->
-          <br>
-          <div class="baseQuery">
-            @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} = #{id} {{ _('/script')}}")
-            <br>
-            {{table.pascalName}} get{{table.pascalName}}ById(@Param("id") {{table.primaryKeyType}}
-            {{table.primaryKeyCamel}});
-            <br>
-            <br>
-            @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} in " +
-            " {{_("foreach collection='ids' index='index' item='item' open='(' close=')' separator=',' ")}} " +
-            " #{item} " +
-            " {{_("/foreach")}} {{ _('/script')}}")
-            <br>
-            List<{{table.pascalName}}> get{{table.pascalName}}ByIds(@Param("ids") List<{{table.primaryKeyType}}> id);
-          </div>
-          <br>
-
-        </div>
-        <div>}</div>
-
-        <div class="querySql">
-          String querySql = " where 1=1 "
-          <div v-for="(column,index) in table.columns">
-            + " {{ _("if test = 'query."+column.camelName+" != null'") }} and {{column.name}} =
-            #{query.{{column.camelName}}} {{_("/if")}} "
-          </div>
-          ;
-        </div>
-        <br/>
-        <div class="insertSingle">
-          <div>
-            @Options(useGeneratedKeys = true, keyProperty = "entity.{{table.primaryKeyCamel}}", keyColumn =
-            "{{table.primaryKey}}")
-            <br/>
-            @Insert("{{_("script")}} insert into {{table.name}} (
-            <span v-for="(column,index) in table.columns">
-              <template v-if="column.name !== table.primaryKey">
-                  {{column.name}}
-                  <span v-if="index !== (table.columns.length-1)">,</span>
-              </template>
-          </span>
-            <span>
-              ) values ( " + <br/>
-              "<span v-for="(column,index) in table.columns">
-                 <template v-if="column.name !== table.primaryKey">
-                        <span>#{entity.{{column.camelName}}}</span>
-                        <span v-if="index !== (table.columns.length-1)">,</span>
-                 </template>
-            </span>
-              )
-            </span>
-            {{_("/script")}}")
-          </div>
-          <div>
-            int singleInsert(@Param("entity") {{table.pascalName}} entity);
-          </div>
-        </div>
-        <br/>
-        <!--TODO 批量插入待优化-->
-        <div class="batchInsert">
-          @Insert("{{_('script')}} insert into {{table.name}} (
-          <template v-for="(column,index) in table.columns">
-            <template v-if="index !==0">
-              ,
+            
+             <template v-if="column.dataType == 'Integer'">
+              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
+              &emsp;&emsp;&emsp;&emsp;return Collections.emptyList(); <br/>
+              &emsp;&emsp;} <br/>
             </template>
-            {{column.name}}
-          </template>
-          ) values " + <br/>
-          "{{_("foreach collection='list' item='item' index='index' separator=',' ")}} " + <br/>
-          " (
-          <template v-for="(column,index) in table.columns">
-            <template v-if="index !==0">
-              ,
-            </template>
-            #{item.{{column.camelName}}}
-          </template>
-          )" + <br/>
-          "{{_("/foreach") + _("/script")}}")
-          <br/>
-          int batchInsert(@Param("list") List{{_(table.pascalName)}} {{table.camelName}});
-        </div>
-
-        <br/>
-        <div class="updateSingle">
-          @Update("{{_('script')}} update {{table.name}} "
-          <br/>
-          + "{{_('set')}}"
-          <template v-for="(column,index) in table.columns">
-            <template v-if="column.name !== table.primaryKey ">
-              <br/>
-              + " {{ _("if test = 'entity."+column.camelName+" != null'") }} {{column.name}} =
-              #{entity.{{column.camelName}}}, {{_("/if")}} "
+            
+              <template v-if="column.dataType == 'String'">
+                &emsp;&emsp;if (StringUtils.isBlank({{column.camelName}})) { <br/>
+                &emsp;&emsp;&emsp;&emsp;return Collections.emptyList();<br/>
+                &emsp;&emsp;}<br/>
             </template>
           </template>
-          <br/>
-          + "{{_('/set')}}"
-          <br/>
-          + "where {{table.primaryKey}} = #{entity.{{table.primaryKeyCamel}}} {{_('/script')}}")
-          <br/>
-          int update(@Param("entity") {{table.pascalName}} entity);
-        </div>
-        <br/>
-        <div class="deleteSingle">
-          @Delete("delete from {{table.name}} where {{table.primaryKey}} = #{id}")
-          <br/>
-          int deleteById(@Param("id") {{table.primaryKeyType}} {{table.primaryKeyCamel}});
-        </div>
-        <!--TODO   待加入批量删除功能-->
-        <br>
-        <div class="baseQuery">
-          @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} = #{id} {{ _('/script')}}")
-          <br>
-          {{table.pascalName}} get{{table.pascalName}}ById(@Param("id") {{table.primaryKeyType}}
-          {{table.primaryKeyCamel}});
-          <br>
-          <br>
-          @Select("{{_('script')}} select * from {{table.name}} where {{table.primaryKey}} in " +
-          " {{_("foreach collection='ids' index='index' item='item' open='(' close=')' separator=',' ")}} " +
-          " #{item} " +
-          " {{_("/foreach")}} {{ _('/script')}}")
-          <br>
-          List<{{table.pascalName}}> get{{table.pascalName}}ByIds(@Param("ids") List<{{table.primaryKeyType}}> id);
-        </div>
+         <br/>
+
+            &emsp;&emsp;Example example = new Example({{table.pascalName}}PO.class);<br/>
+            &emsp;&emsp;example.createCriteria()<br/>
+            <template v-for="(column,index) in selectFields">
+              <div>
+                &emsp;&emsp;&emsp;&emsp;.andEqualTo("{{column.camelName}}", {{column.camelName}})
+                 <template v-if="index === (selectFields.length-1)">;</template>
+              </div>
+            </template>
+            <br/>
+
+            &emsp;&emsp;List{{_(table.pascalName+"PO")}} {{table.camelName}}List = mapper.selectByExample(example);<br/>
+            &emsp;&emsp;if (CollectionUtils.isEmpty({{table.camelName}}List)) {<br/>
+                &emsp;&emsp;&emsp;&emsp;return Collections.emptyList();<br/>
+            &emsp;&emsp;}<br/>
+            &emsp;&emsp;return BeanConverter.copyList({{table.camelName}}List, {{table.pascalName}}BO.class);<br/>
+        }<br/>
+    </template>
+    
+    <br/>
+    <template>
+    @Override<br/>
+    public Integer updateBySelective(
+          <template v-for="(column,index) in selectFields">
+            {{column.dataType}} {{column.camelName}}
+            <template v-if="index !== (selectFields.length-1)">,</template>
+          </template>) {<br/>
+       
+          <template v-for="column in selectFields">
+            <template v-if="column.dataType == 'Long'">
+              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+              &emsp;&emsp;&emsp;&emsp;return 0; <br/>
+              &emsp;&emsp;} <br/>
+            </template>
+            
+             <template v-if="column.dataType == 'Integer'">
+              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
+              &emsp;&emsp;&emsp;&emsp;return 0; <br/>
+              &emsp;&emsp;} <br/>
+            </template>
+            
+              <template v-if="column.dataType == 'String'">
+                &emsp;&emsp;if (StringUtils.isBlank({{column.camelName}})) { <br/>
+                &emsp;&emsp;&emsp;&emsp;return 0;<br/>
+                &emsp;&emsp;}<br/>
+            </template>
+          </template>
+
+        &emsp;&emsp;FollowRoomMemberPO memberPO = new FollowRoomMemberPO();<br/>
+        &emsp;&emsp;memberPO.setIsFollowAll(0);<br/>
         
+        <br/>
+        &emsp;&emsp;Example updateWhere = new Example(FollowRoomMemberPO.class);<br/>
+        &emsp;&emsp;updateWhere.createCriteria()<br/>
+                &emsp;&emsp;&emsp;&emsp;.andEqualTo("roomId", roomId)<br/>
+                &emsp;&emsp;&emsp;&emsp;.andEqualTo("isFollowAll", 1);<br/>
+        &emsp;&emsp;return memberPOMapper.updateByExampleSelective(memberPO, updateWhere);<br/>
+    }
+    </template>
 
-      </div>
-      <div>}</div>
-    </div>
+    <br/>
+    <template>
+    @Override<br/>
+    public {{table.pascalName}}BO findById({{table.primaryKeyType}} id) {<br/>
+    &emsp;&emsp;if (id == null) {<br/>
+    &emsp;&emsp;&emsp;return null;<br/>
+    &emsp;&emsp;}<br/>
+    &emsp;&emsp;return BeanConverter.copy(mapper.selectByPrimaryKey(id), {{table.pascalName}}BO.class);<br/>
+    }<br/>
+    </template>
+
+     <br/>
+    <template>
+    @Override<br/>
+    public List{{_(table.pascalName+"BO")}} findByIds(List{{_(table.primaryKeyType)}} ids) {<br/>
+    &emsp;&emsp;if (CollectionUtils.isEmpty(ids)) {<br/>
+    &emsp;&emsp;&emsp;return Collections.emptyList();<br/>
+    &emsp;&emsp;}<br/>
+    &emsp;&emsp;Example example = new Example({{table.pascalName}}PO.class);<br/>
+    &emsp;&emsp;example.createCriteria().andIn("id", ids);<br/>
+    &emsp;&emsp;return BeanConverter.copyList(mapper.selectByExample(example), {{table.pascalName}}BO.class);<br/>
+    }<br/>
+    </template>
+    <br/>
+    <template>
+    @Override<br/>
+    public {{table.primaryKeyType}} add({{table.pascalName}}BO entityBO) {<br/>
+        &emsp;&emsp;if (entityBO == null) {<br/>
+            &emsp;&emsp;&emsp;&emsp;return 0;<br/>
+        &emsp;&emsp;}<br/>
+        &emsp;&emsp;{{table.pascalName}}PO entityPO = BeanConverter.copy(entityBO, {{table.pascalName}}PO.class);<br/>
+        &emsp;&emsp;mapper.insertSelective(entityPO);<br/>
+        &emsp;&emsp;return entityPO.getId();<br/>
+    }<br/>
+    </template>
+    
+  </div>
+
 
     <div id="publicService" v-if="show.showService">
       <div class="rpc">
@@ -586,6 +526,7 @@ import { fail } from 'assert';
         msg: '',
         table: '',
         tables: '',
+        selectFields: [],      
         filter: {
           columns: ['gmt_create', 'gmt_modify']
         },
@@ -631,6 +572,12 @@ import { fail } from 'assert';
           return symbol;
         }
       },
+      clearSelectFields() {
+          this.selectFields = [];
+      },
+      pushField(field) {
+          this.selectFields.push(field);
+      },
       showAction: function (data) {
         for (let property in this.show) {
           if (data === property) {
@@ -645,6 +592,19 @@ import { fail } from 'assert';
           return this.magic.magicReturn + '<' + data + '>';
         }
         return data;
+      },addTab(count){
+        if(count == 1){
+          return '&emsp;';
+        }
+        if(count == 2){
+          return '&emsp;&emsp;';
+        }
+        if(count == 3){
+          return '&emsp;&emsp;&emsp;';
+        }
+        if(count == 4){
+          return '&emsp;&emsp;&emsp;&emsp;';
+        }
       }
     }
   }
