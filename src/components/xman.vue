@@ -24,8 +24,6 @@
       
 public class SelfBuyOrderListDTO {
 
-    private static final long serialVersionUID = -1840699148929421485L;
-
     /**
      * 商品id(本平台),  后端暂不用返回
      */

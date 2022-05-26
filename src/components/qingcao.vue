@@ -11,7 +11,7 @@
     <!--<i-button @click="showAction('showEnum')">enum me!</i-button>-->
     <i-button @click="showAction('showOther')">mock me!</i-button>
     <i-button @click="showAction('showPythonSql')">python sql!</i-button>
-    <i-button @click="clearSelectFields()">clearClickFiled</i-button>
+    <i-button @click="clearClickFileds()">clearClickFileds</i-button>
 
 
     <span>{{msg}}</span>
@@ -23,8 +23,10 @@
 
     <div id="columns" style=" margin: 10px;">
          <template v-for="column in table.columns" >          
-            <div style='cursor:pointer; width: 200px; display: inline-block;' @click="pushField(column)">
-            {{column.pascalName}}
+            <div style=' width: 200px; display: inline-block; margin-top:10px;margin-bottom:5px;' >
+              <div @click="pushField(column,1)" style="display: inline-block; cursor:pointer; margin-right: 10px; ">getOrWhere</div> 
+              <div @click="pushField(column,2)" style="display: inline-block; cursor:pointer; ">setOrSelect</div>
+              <div style=""> {{column.pascalName}} </div>              
             </div>
         </template>
     </div>
@@ -94,12 +96,12 @@ create table follow_room_member
     <template>
         @Override<br/>
         public List{{_(table.pascalName+"BO")}} findList(
-          <template v-for="(column,index) in selectFields">
+          <template v-for="(column,index) in clickedFields">
             {{column.dataType}} {{column.camelName}}
-            <template v-if="index !== (selectFields.length-1)">,</template>
+            <template v-if="index !== (clickedFields.length-1)">,</template>
           </template>) {<br/>
           
-          <template v-for="column in selectFields">
+          <template v-for="column in clickedFields">
 
             <template v-if="column.dataType == 'Long'">
               &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
@@ -123,10 +125,10 @@ create table follow_room_member
 
             &emsp;&emsp;Example example = new Example({{table.pascalName}}PO.class);<br/>
             &emsp;&emsp;example.createCriteria()<br/>
-            <template v-for="(column,index) in selectFields">
+            <template v-for="(column,index) in whereFields">
               <div>
                 &emsp;&emsp;&emsp;&emsp;.andEqualTo("{{column.camelName}}", {{column.camelName}})
-                 <template v-if="index === (selectFields.length-1)">;</template>
+                 <template v-if="index === (whereFields.length-1)">;</template>
               </div>
             </template>
             <br/>
@@ -143,12 +145,12 @@ create table follow_room_member
     <template>
     @Override<br/>
     public Integer updateBySelective(
-          <template v-for="(column,index) in selectFields">
+          <template v-for="(column,index) in clickedFields">
             {{column.dataType}} {{column.camelName}}
-            <template v-if="index !== (selectFields.length-1)">,</template>
+            <template v-if="index !== (clickedFields.length-1)">,</template>
           </template>) {<br/>
        
-          <template v-for="column in selectFields">
+          <template v-for="column in clickedFields">
             <template v-if="column.dataType == 'Long'">
               &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
               &emsp;&emsp;&emsp;&emsp;return 0; <br/>
@@ -168,15 +170,25 @@ create table follow_room_member
             </template>
           </template>
 
-        &emsp;&emsp;FollowRoomMemberPO memberPO = new FollowRoomMemberPO();<br/>
-        &emsp;&emsp;memberPO.setIsFollowAll(0);<br/>
+        &emsp;&emsp;{{table.pascalName}}PO entity = new {{table.pascalName}}PO();<br/>
         
-        <br/>
-        &emsp;&emsp;Example updateWhere = new Example(FollowRoomMemberPO.class);<br/>
+         <template v-for="(column,index) in setFields">
+          <div>           
+           &emsp;&emsp;entity.set{{column.pascalName}}({{column.camelName}})<br/>
+              <template v-if="index === (whereFields.length-1)">;</template>
+          </div>
+        </template>
+      
+        &emsp;&emsp;Example updateWhere = new Example({{table.pascalName}}PO.class);<br/>
         &emsp;&emsp;updateWhere.createCriteria()<br/>
-                &emsp;&emsp;&emsp;&emsp;.andEqualTo("roomId", roomId)<br/>
-                &emsp;&emsp;&emsp;&emsp;.andEqualTo("isFollowAll", 1);<br/>
-        &emsp;&emsp;return memberPOMapper.updateByExampleSelective(memberPO, updateWhere);<br/>
+        <template v-for="(column,index) in whereFields">
+          <div>
+            &emsp;&emsp;&emsp;&emsp;.andEqualTo("{{column.camelName}}", {{column.camelName}})
+              <template v-if="index === (whereFields.length-1)">;</template>
+          </div>
+        </template>
+        <br/>
+        &emsp;&emsp;return mapper.updateByExampleSelective(entity, updateWhere);<br/>
     }
     </template>
 
@@ -525,8 +537,10 @@ import { fail } from 'assert';
         visible: false,
         msg: '',
         table: '',
-        tables: '',
-        selectFields: [],      
+        tables: '',        
+        clickedFields: [],
+        whereFields: [],
+        setFields: [],
         filter: {
           columns: ['gmt_create', 'gmt_modify']
         },
@@ -572,11 +586,50 @@ import { fail } from 'assert';
           return symbol;
         }
       },
-      clearSelectFields() {
-          this.selectFields = [];
+      clearClickFileds() {
+          this.whereFields = [];
+          this.setFields = [];
+          this.clickedFields = [];
       },
-      pushField(field) {
-          this.selectFields.push(field);
+      pushField(field, pushType) {
+          if(pushType == 1) {        
+            let contains = false;
+            this.whereFields.forEach(t=> {
+              if(t.camelName == field.camelName){
+                contains = true;
+                return; 
+              }
+            
+            });
+
+            if(!contains) {
+              this.whereFields.push(field);
+            }
+          } else if(pushType == 2) {        
+            let contains = false;
+            this.setFields.forEach(function(t) {
+              if(t.camelName == field.camelName){
+                contains = true;
+                return; 
+              }          
+            });
+
+            if(!contains) {
+              this.setFields.push(field);
+            }
+          }
+
+          
+          let containsAll = false;
+          this.clickedFields.forEach(function(t) {
+            if(t.camelName == field.camelName){
+              containsAll = true;
+              return; 
+            }          
+          });
+          if(!containsAll) {
+            this.clickedFields.push(field);
+          }
       },
       showAction: function (data) {
         for (let property in this.show) {
