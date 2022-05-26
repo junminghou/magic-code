@@ -131,9 +131,17 @@ create table follow_room_member
                 &emsp;&emsp;&emsp;&emsp;.andEqualTo("{{column.camelName}}", {{column.camelName}})
                  <template v-if="index === (whereFields.length-1)">;</template>
               </div>
+            </template>          
+            <template v-if="orderFields.length>0">
+            &emsp;&emsp;example.setOrderByClause("
+              <template v-for="(column,index) in orderFields">
+              {{column.name}} desc
+               <template v-if="index !== (orderFields.length-1)">,</template>
+              </template>
+              ");
             </template>
             <br/>
-
+            <br/>
             &emsp;&emsp;List{{_(table.pascalName+"PO")}} {{table.camelName}}List = mapper.selectByExample(example);<br/>
             &emsp;&emsp;if (CollectionUtils.isEmpty({{table.camelName}}List)) {<br/>
                 &emsp;&emsp;&emsp;&emsp;return Collections.emptyList();<br/>
