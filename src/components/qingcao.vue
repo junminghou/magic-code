@@ -24,8 +24,9 @@
     <div id="columns" style=" margin: 10px;">
          <template v-for="column in table.columns" >          
             <div style=' width: 200px; display: inline-block; margin-top:10px;margin-bottom:5px;' >
-              <div @click="pushField(column,1)" style="display: inline-block; cursor:pointer; margin-right: 10px; ">getOrWhere</div> 
+              <div @click="pushField(column,1)" style="display: inline-block; cursor:pointer;">getOrWhere</div> 
               <div @click="pushField(column,2)" style="display: inline-block; cursor:pointer; ">setOrSelect</div>
+              <div @click="pushField(column,3)" style="display: inline-block; cursor:pointer; ">orderBy</div>
               <div style=""> {{column.pascalName}} </div>              
             </div>
         </template>
@@ -215,6 +216,7 @@ create table follow_room_member
     &emsp;&emsp;return BeanConverter.copyList(mapper.selectByExample(example), {{table.pascalName}}BO.class);<br/>
     }<br/>
     </template>
+    
     <br/>
     <template>
     @Override<br/>
@@ -227,7 +229,53 @@ create table follow_room_member
         &emsp;&emsp;return entityPO.getId();<br/>
     }<br/>
     </template>
-    
+   
+   <br/>
+    <template>
+      @Override<br/>
+      private Example getFilter({{table.pascalName}}SearchBO option) { <br/>
+        &emsp;&emsp;Example example = new Example({{table.pascalName}}PO.class); <br/>
+        &emsp;&emsp;Example.Criteria criteria = example.createCriteria(); <br/><br/>
+
+        <template v-for="(column,index) in whereFields">         
+           <template v-if="column.dataType == 'Integer'">
+              &emsp;&emsp;if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0) > 0) { <br/>
+               &emsp;&emsp;&emsp;&emsp;criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+              &emsp;&emsp;} <br/>
+            </template>
+
+            <template v-if="column.dataType == 'Long'">
+              &emsp;&emsp;if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0L) > 0L) { <br/>
+              &emsp;&emsp;&emsp;&emsp;criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+              &emsp;&emsp;} <br/>
+            </template>
+
+            <template v-if="column.dataType == 'String'">
+                &emsp;&emsp;if (StringUtils.isNotBlank(option.get{{column.pascalName}})) { <br/>
+                 &emsp;&emsp;&emsp;&emsp;criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+                &emsp;&emsp;}<br/>
+            </template>
+        </template>
+        <br/>
+        &emsp;&emsp;String orderStr = ""; <br/>
+        &emsp;&emsp;String ascOrDesc = "desc"; <br/>
+        &emsp;&emsp;if (option.getAsc()) { <br/>
+            &emsp;&emsp;&emsp;&emsp;ascOrDesc = "asc"; <br/>
+        &emsp;&emsp;} <br/>
+        &emsp;&emsp;if (Optional.ofNullable(option.getOrderValue()).orElse(0) > 0) { <br/>      
+          <template v-for="(column,index) in orderFields">    
+            &emsp;&emsp;&emsp;&emsp;if (option.getOrderValue() == 1) { <br/>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;orderStr = " {{column.name}} " + ascOrDesc; <br/>
+            &emsp;&emsp;&emsp;&emsp;} <br/>
+          </template>    
+        &emsp;&emsp;} else { <br/>
+            &emsp;&emsp;&emsp;&emsp;orderStr = " id desc "; <br/>
+        &emsp;&emsp;} <br/>
+
+        &emsp;&emsp;example.setOrderByClause(orderStr); <br/>
+        &emsp;&emsp;return example;<br/>
+    }<br/>
+    </template>
   </div>
 
 
@@ -538,6 +586,7 @@ import { fail } from 'assert';
         msg: '',
         table: '',
         tables: '',        
+        orderFields: [],
         clickedFields: [],
         whereFields: [],
         setFields: [],
@@ -590,35 +639,43 @@ import { fail } from 'assert';
           this.whereFields = [];
           this.setFields = [];
           this.clickedFields = [];
+          this.orderFields = [];
       },
       pushField(field, pushType) {
-          if(pushType == 1) {        
-            let contains = false;
+          let contains = false;
+          if(pushType == 1) {                  
             this.whereFields.forEach(t=> {
               if(t.camelName == field.camelName){
                 contains = true;
                 return; 
-              }
-            
+              }            
             });
 
             if(!contains) {
               this.whereFields.push(field);
             }
-          } else if(pushType == 2) {        
-            let contains = false;
+          } else if(pushType == 2) {                  
             this.setFields.forEach(function(t) {
               if(t.camelName == field.camelName){
                 contains = true;
                 return; 
               }          
             });
-
             if(!contains) {
               this.setFields.push(field);
             }
+          } else if(pushType == 3) {                    
+            this.orderFields.forEach(function(t) {
+              if(t.camelName == field.camelName){
+                contains = true;
+                return; 
+              }          
+            });
+            if(!contains) {
+              this.orderFields.push(field);
+            }
+            return;
           }
-
           
           let containsAll = false;
           this.clickedFields.forEach(function(t) {
