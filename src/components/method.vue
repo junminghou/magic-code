@@ -17,11 +17,11 @@
     </div>
 
     <div id="class_member_script" ref="class_member_script">
-      private FollowRoomApplyBusiness applyBusiness;
+      private TaskHirePublishManager publishManager;
     </div>
 
-    <div id="create_table_script" ref="create_table_script">
-      ServiceResultVO{{_("Boolean")}} bindFollowAccount(FollowRoomBindFollowAccountBO accountBO);
+    <div id="create_table_script" ref="create_table_script">    
+      ServiceResultVO{{_("Boolean")}} updateTask(TaskHirePublishPreCheckRequestBO requestBO)
     </div>
 
     <div id="publicClass" v-if="show.showClass">

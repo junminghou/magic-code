@@ -33,31 +33,53 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-create table follow_room_member
+
+-- auto-generated definition
+create table task_hire_publish
 (
-    id                      bigint unsigned auto_increment
+    id                        bigint unsigned auto_increment
         primary key,
-    app_type                int unsigned     default 0                    not null comment 'app类型 0 轻抖APP 1 轻草提词器 2 轻草',
-    user_id                 bigint unsigned  default 0                    not null comment '用户',
-    room_id                 bigint unsigned  default 0                    not null comment '房间Id',
-    join_fee                int(10)          default 0                    not null comment '加入费用',
-    is_owner                tinyint(1)       default 0                    not null comment '是否房主',
-    invite_user_id          bigint           default 0                    not null comment '邀请人',
-    account_id              bigint unsigned  default 0                    not null comment '媒体账号表id',
-    work_id                 bigint unsigned  default 0                    not null comment '作品id',
-    join_times              int(11) unsigned default 1                    not null comment '该房间加入次数',
-    pay_type                int(11) unsigned default 1                    not null comment '支付类型, 0: 免费, 1: 付费',
-    join_status             int(11) unsigned default 0                    not null comment '加入的状态, 0: 加入中, 1: 加入成功, 2: 失效或取消',
-    pre_join_time           int unsigned     default 0                    not null comment '预检查时的加入时间',
-    join_time               int unsigned     default 0                    not null comment '成功的加入时间',
-    failure_time            int(11) unsigned default 0                    not null comment '失效或取消时间',
-    last_remind_follow_time int unsigned     default 0                    not null comment '最后被催关时间',
-    is_follow_all           tinyint unsigned default 0                    not null comment '是否关注房内所有人',
-    create_time             datetime(3)      default CURRENT_TIMESTAMP(3) not null,
-    update_time             datetime(3)      default CURRENT_TIMESTAMP(3) not null on update CURRENT_TIMESTAMP(3),
-    is_deleted              tinyint unsigned default 0                    not null
+    user_id                   bigint unsigned  default 0                 not null comment '发布任务的uid',
+    app_type                  int unsigned     default 0                 not null comment 'app类型 0 轻抖APP 1 轻草提词器 2 轻草',
+    task_status               tinyint unsigned default 0                 not null comment '任务状态',
+    task_platform_id          int unsigned     default 0                 not null comment '任务平台ID',
+    task_type_id              int unsigned     default 0                 not null comment '任务类型ID',
+    flag                      int unsigned     default 0                 not null comment '特殊标识位0:无 1:抖音平台',
+    publish_service_fee_ratio int unsigned     default 0                 not null comment '发布者服务费率,万分比',
+    apply_service_fee_ratio   int unsigned     default 0                 not null comment '接单人服务费率，万分比',
+    credit_day                int unsigned     default 0                 not null comment '接单人完成后账期,单位为天',
+    service_fee               bigint unsigned  default 0                 not null comment '发布者服务费,单位为分,出现厘多收到分',
+    publish_service_fee_flag  int unsigned     default 0                 not null comment '发布者服务费收取标识位',
+    task_money_per            bigint unsigned  default 0                 not null comment '单次任务赏金',
+    send_money_count          int              default 0                 not null comment '已经打款的报名数量',
+    task_money_all            bigint unsigned  default 0                 not null comment '任务总金额（分为单位）',
+    task_money_all_pay        bigint unsigned  default 0                 not null comment '发布任务总支付金额(分为单位)',
+    task_content              varchar(2048)    default ''                not null comment '任务要求',
+    task_apply_limit          int unsigned     default 0                 not null comment '任务报名人数限制（总名额）',
+    task_apply_progress       int unsigned     default 0                 not null comment '任务报名进度对应人数（已通过）',
+    task_apply_all            int unsigned     default 0                 not null comment '任务报名成功总数',
+    task_publish_time         int(11) unsigned default 0                 not null comment '任务发布时间',
+    task_cancel_time          int(11) unsigned default 0                 not null comment '任务取消时间 用户手动终止任务时间',
+    task_start_time           int(11) unsigned default 0                 not null comment '任务开始时间',
+    task_end_time             int(11) unsigned default 0                 not null comment '任务结束时间',
+    task_fans_require         bigint unsigned  default 0                 not null comment '粉丝数要求',
+    task_image                varchar(1024)    default ''                not null comment '任务图片JSON结构数据',
+    task_link                 varchar(8192)    default ''                not null comment '任务链接JSON结构数据',
+    task_phone                varchar(32)      default ''                not null comment '任务联系手机',
+    is_open_phone             tinyint unsigned default 0                 not null comment '0 允许对方电话联系 1允许',
+    price_plus_weight         bigint unsigned  default 0                 not null comment '单价排序权重字段',
+    reject_reason             varchar(2048)    default ''                not null comment '审核不通过原因',
+    ai_verify_status          int(10)          default 0                 not null comment '机审状态',
+    ai_verify_time            int(11) unsigned default 0                 not null comment '机审时间戳',
+    coin_return_flag          int unsigned     default 0                 not null comment '任务终止轻币是否处理flag 0 未处理  1已处理',
+    thumbs_up_count           bigint unsigned  default 0                 not null comment '好评数',
+    thumbs_down_count         bigint unsigned  default 0                 not null comment '差评数',
+    create_time               datetime         default CURRENT_TIMESTAMP not null,
+    update_time               datetime         default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+    is_deleted                tinyint          default 0                 not null
 )
-    comment '互关房用户参与表';
+    comment '牛人任务表';
+
 
     </div>
 
@@ -92,8 +114,10 @@ create table follow_room_member
       </div>
     </div>
 
-  <div id="publicMapper" v-if="show.showMapper">
-     
+  <div id="publicMapper" v-if="show.showMapper" style="display: inline-flex;padding-top: 20px;">
+
+    <div >
+ 
     <template>
         @Override<br/>
         public List{{_(table.pascalName+"BO")}} findList(
@@ -105,35 +129,35 @@ create table follow_room_member
           <template v-for="column in clickedFields">
 
             <template v-if="column.dataType == 'Long'">
-              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
-              &emsp;&emsp;&emsp;&emsp;return Collections.emptyList(); <br/>
-              &emsp;&emsp;} <br/>
+               if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+              {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
+              {{showTab(2)}}} <br/>
             </template>
             
              <template v-if="column.dataType == 'Integer'">
-              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
-              &emsp;&emsp;&emsp;&emsp;return Collections.emptyList(); <br/>
-              &emsp;&emsp;} <br/>
+              {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
+              {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
+              {{showTab(2)}}} <br/>
             </template>
             
               <template v-if="column.dataType == 'String'">
-                &emsp;&emsp;if (StringUtils.isBlank({{column.camelName}})) { <br/>
-                &emsp;&emsp;&emsp;&emsp;return Collections.emptyList();<br/>
-                &emsp;&emsp;}<br/>
+                {{showTab(2)}}if (StringUtils.isBlank({{column.camelName}})) { <br/>
+                {{showTab(2)}}{{showTab(2)}}return Collections.emptyList();<br/>
+                {{showTab(2)}}}<br/>
             </template>
           </template>
          <br/>
 
-            &emsp;&emsp;Example example = new Example({{table.pascalName}}PO.class);<br/>
-            &emsp;&emsp;example.createCriteria()<br/>
+            {{showTab(2)}}Example example = new Example({{table.pascalName}}PO.class);<br/>
+            {{showTab(2)}}example.createCriteria()<br/>
             <template v-for="(column,index) in whereFields">
               <div>
-                &emsp;&emsp;&emsp;&emsp;.andEqualTo("{{column.camelName}}", {{column.camelName}})
+                {{showTab(2)}}{{showTab(2)}}.andEqualTo("{{column.camelName}}", {{column.camelName}})
                  <template v-if="index === (whereFields.length-1)">;</template>
               </div>
             </template>          
             <template v-if="orderFields.length>0">
-            &emsp;&emsp;example.setOrderByClause("
+            {{showTab(2)}}example.setOrderByClause("
               <template v-for="(column,index) in orderFields">
               {{column.name}} desc
                <template v-if="index !== (orderFields.length-1)">,</template>
@@ -142,73 +166,22 @@ create table follow_room_member
             </template>
             <br/>
             <br/>
-            &emsp;&emsp;List{{_(table.pascalName+"PO")}} {{table.camelName}}List = mapper.selectByExample(example);<br/>
-            &emsp;&emsp;if (CollectionUtils.isEmpty({{table.camelName}}List)) {<br/>
-                &emsp;&emsp;&emsp;&emsp;return Collections.emptyList();<br/>
-            &emsp;&emsp;}<br/>
-            &emsp;&emsp;return BeanConverter.copyList({{table.camelName}}List, {{table.pascalName}}BO.class);<br/>
+            {{showTab(2)}}List{{_(table.pascalName+"PO")}} {{table.camelName}}List = mapper.selectByExample(example);<br/>
+            {{showTab(2)}}if (CollectionUtils.isEmpty({{table.camelName}}List)) {<br/>
+                {{showTab(2)}}{{showTab(2)}}return Collections.emptyList();<br/>
+            {{showTab(2)}}}<br/>
+            {{showTab(2)}}return BeanConverter.copyList({{table.camelName}}List, {{table.pascalName}}BO.class);<br/>
         }<br/>
     </template>
-    
-    <br/>
-    <template>
-    @Override<br/>
-    public Integer updateBySelective(
-          <template v-for="(column,index) in clickedFields">
-            {{column.dataType}} {{column.camelName}}
-            <template v-if="index !== (clickedFields.length-1)">,</template>
-          </template>) {<br/>
-       
-          <template v-for="column in clickedFields">
-            <template v-if="column.dataType == 'Long'">
-              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
-              &emsp;&emsp;&emsp;&emsp;return 0; <br/>
-              &emsp;&emsp;} <br/>
-            </template>
-            
-             <template v-if="column.dataType == 'Integer'">
-              &emsp;&emsp;if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
-              &emsp;&emsp;&emsp;&emsp;return 0; <br/>
-              &emsp;&emsp;} <br/>
-            </template>
-            
-              <template v-if="column.dataType == 'String'">
-                &emsp;&emsp;if (StringUtils.isBlank({{column.camelName}})) { <br/>
-                &emsp;&emsp;&emsp;&emsp;return 0;<br/>
-                &emsp;&emsp;}<br/>
-            </template>
-          </template>
 
-        &emsp;&emsp;{{table.pascalName}}PO entity = new {{table.pascalName}}PO();<br/>
-        
-         <template v-for="(column,index) in setFields">
-          <div>           
-           &emsp;&emsp;entity.set{{column.pascalName}}({{column.camelName}})<br/>
-              <template v-if="index === (whereFields.length-1)">;</template>
-          </div>
-        </template>
-      
-        &emsp;&emsp;Example updateWhere = new Example({{table.pascalName}}PO.class);<br/>
-        &emsp;&emsp;updateWhere.createCriteria()<br/>
-        <template v-for="(column,index) in whereFields">
-          <div>
-            &emsp;&emsp;&emsp;&emsp;.andEqualTo("{{column.camelName}}", {{column.camelName}})
-              <template v-if="index === (whereFields.length-1)">;</template>
-          </div>
-        </template>
-        <br/>
-        &emsp;&emsp;return mapper.updateByExampleSelective(entity, updateWhere);<br/>
-    }
-    </template>
-
-    <br/>
+      <br/>
     <template>
     @Override<br/>
     public {{table.pascalName}}BO findById({{table.primaryKeyType}} id) {<br/>
-    &emsp;&emsp;if (id == null) {<br/>
-    &emsp;&emsp;&emsp;return null;<br/>
-    &emsp;&emsp;}<br/>
-    &emsp;&emsp;return BeanConverter.copy(mapper.selectByPrimaryKey(id), {{table.pascalName}}BO.class);<br/>
+    {{showTab(2)}}if (id == null) {<br/>
+    {{showTab(2)}}&nbsp;return null;<br/>
+    {{showTab(2)}}}<br/>
+    {{showTab(2)}}return BeanConverter.copy(mapper.selectByPrimaryKey(id), {{table.pascalName}}BO.class);<br/>
     }<br/>
     </template>
 
@@ -216,74 +189,173 @@ create table follow_room_member
     <template>
     @Override<br/>
     public List{{_(table.pascalName+"BO")}} findByIds(List{{_(table.primaryKeyType)}} ids) {<br/>
-    &emsp;&emsp;if (CollectionUtils.isEmpty(ids)) {<br/>
-    &emsp;&emsp;&emsp;return Collections.emptyList();<br/>
-    &emsp;&emsp;}<br/>
-    &emsp;&emsp;Example example = new Example({{table.pascalName}}PO.class);<br/>
-    &emsp;&emsp;example.createCriteria().andIn("id", ids);<br/>
-    &emsp;&emsp;return BeanConverter.copyList(mapper.selectByExample(example), {{table.pascalName}}BO.class);<br/>
+    {{showTab(2)}}if (CollectionUtils.isEmpty(ids)) {<br/>
+    {{showTab(2)}}&nbsp;return Collections.emptyList();<br/>
+    {{showTab(2)}}}<br/>
+    {{showTab(2)}}Example example = new Example({{table.pascalName}}PO.class);<br/>
+    {{showTab(2)}}example.createCriteria().andIn("id", ids);<br/>
+    {{showTab(2)}}return BeanConverter.copyList(mapper.selectByExample(example), {{table.pascalName}}BO.class);<br/>
     }<br/>
     </template>
-    
-    <br/>
-    <template>
-    @Override<br/>
-    public {{table.primaryKeyType}} add({{table.pascalName}}BO entityBO) {<br/>
-        &emsp;&emsp;if (entityBO == null) {<br/>
-            &emsp;&emsp;&emsp;&emsp;return 0;<br/>
-        &emsp;&emsp;}<br/>
-        &emsp;&emsp;{{table.pascalName}}PO entityPO = BeanConverter.copy(entityBO, {{table.pascalName}}PO.class);<br/>
-        &emsp;&emsp;mapper.insertSelective(entityPO);<br/>
-        &emsp;&emsp;return entityPO.getId();<br/>
-    }<br/>
-    </template>
-   
-   <br/>
+
+     <br/>
     <template>
       @Override<br/>
       private Example getFilter({{table.pascalName}}SearchBO option) { <br/>
-        &emsp;&emsp;Example example = new Example({{table.pascalName}}PO.class); <br/>
-        &emsp;&emsp;Example.Criteria criteria = example.createCriteria(); <br/><br/>
+        {{showTab(2)}}Example example = new Example({{table.pascalName}}PO.class); <br/>
+        {{showTab(2)}}Example.Criteria criteria = example.createCriteria(); <br/><br/>
 
         <template v-for="(column,index) in whereFields">         
            <template v-if="column.dataType == 'Integer'">
-              &emsp;&emsp;if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0) > 0) { <br/>
-               &emsp;&emsp;&emsp;&emsp;criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
-              &emsp;&emsp;} <br/>
+              {{showTab(2)}}if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0) > 0) { <br/>
+               {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+              {{showTab(2)}}} <br/>
             </template>
 
             <template v-if="column.dataType == 'Long'">
-              &emsp;&emsp;if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0L) > 0L) { <br/>
-              &emsp;&emsp;&emsp;&emsp;criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
-              &emsp;&emsp;} <br/>
+              {{showTab(2)}}if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0L) > 0L) { <br/>
+              {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+              {{showTab(2)}}} <br/>
             </template>
 
             <template v-if="column.dataType == 'String'">
-                &emsp;&emsp;if (StringUtils.isNotBlank(option.get{{column.pascalName}})) { <br/>
-                 &emsp;&emsp;&emsp;&emsp;criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
-                &emsp;&emsp;}<br/>
+                {{showTab(2)}}if (StringUtils.isNotBlank(option.get{{column.pascalName}})) { <br/>
+                 {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+                {{showTab(2)}}}<br/>
             </template>
         </template>
         <br/>
-        &emsp;&emsp;String orderStr = ""; <br/>
-        &emsp;&emsp;String ascOrDesc = "desc"; <br/>
-        &emsp;&emsp;if (option.getAsc()) { <br/>
-            &emsp;&emsp;&emsp;&emsp;ascOrDesc = "asc"; <br/>
-        &emsp;&emsp;} <br/>
-        &emsp;&emsp;if (Optional.ofNullable(option.getOrderValue()).orElse(0) > 0) { <br/>      
+        {{showTab(2)}}String orderStr = ""; <br/>
+        {{showTab(2)}}String ascOrDesc = "desc"; <br/>
+        {{showTab(2)}}if (option.getAsc()) { <br/>
+            {{showTab(2)}}{{showTab(2)}}ascOrDesc = "asc"; <br/>
+        {{showTab(2)}}} <br/>
+        {{showTab(2)}}if (Optional.ofNullable(option.getOrderValue()).orElse(0) > 0) { <br/>      
           <template v-for="(column,index) in orderFields">    
-            &emsp;&emsp;&emsp;&emsp;if (option.getOrderValue() == 1) { <br/>
-                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;orderStr = " {{column.name}} " + ascOrDesc; <br/>
-            &emsp;&emsp;&emsp;&emsp;} <br/>
+            {{showTab(2)}}{{showTab(2)}}if (option.getOrderValue() == 1) { <br/>
+                {{showTab(2)}}{{showTab(2)}}{{showTab(2)}}orderStr = " {{column.name}} " + ascOrDesc; <br/>
+            {{showTab(2)}}{{showTab(2)}}} <br/>
           </template>    
-        &emsp;&emsp;} else { <br/>
-            &emsp;&emsp;&emsp;&emsp;orderStr = " id desc "; <br/>
-        &emsp;&emsp;} <br/>
+        {{showTab(2)}}} else { <br/>
+            {{showTab(2)}}{{showTab(2)}}orderStr = " id desc "; <br/>
+        {{showTab(2)}}} <br/>
 
-        &emsp;&emsp;example.setOrderByClause(orderStr); <br/>
-        &emsp;&emsp;return example;<br/>
+        {{showTab(2)}}example.setOrderByClause(orderStr); <br/>
+        {{showTab(2)}}return example;<br/>
     }<br/>
     </template>
+    </div>
+
+    <div class="codeStye">
+       
+        <template>
+        @Override<br/>
+        public Integer updateByExampleSelective({{table.pascalName}}BO setterBO,
+              <template v-for="(column,index) in whereFields">
+                {{column.dataType}} {{column.camelName}}
+                <template v-if="index !== (whereFields.length-1)">,</template>
+              </template>) {<br/>
+          
+              <template v-for="column in whereFields">
+                <template v-if="column.dataType == 'Long'">
+                  {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}return 0; <br/>
+                  {{showTab(2)}}} <br/>
+                </template>
+                
+                <template v-if="column.dataType == 'Integer'">
+                  {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}return 0; <br/>
+                  {{showTab(2)}}} <br/>
+                </template>
+                
+                  <template v-if="column.dataType == 'String'">
+                    {{showTab(2)}}if (StringUtils.isBlank({{column.camelName}})) { <br/>
+                    {{showTab(2)}}{{showTab(2)}}return 0;<br/>
+                    {{showTab(2)}}}<br/>
+                </template>
+              </template>
+            {{showTab(2)}}Example updateWhere = new Example({{table.pascalName}}PO.class);<br/>
+            {{showTab(2)}}updateWhere.createCriteria()<br/>
+            <br/>
+            <template v-for="(column,index) in whereFields">
+              <div>
+                {{showTab(2)}}{{showTab(2)}}.andEqualTo("{{column.camelName}}", {{column.camelName}})
+                  <template v-if="index === (whereFields.length-1)">;</template>
+              </div>
+            </template>
+
+            {{showTab(2)}}{{table.pascalName}}PO entity = BeanConverter.copy(setterBO, {{table.pascalName}}PO.class);
+            <br/>
+            {{showTab(2)}}return mapper.updateByExampleSelective(entity, updateWhere);<br/>
+        }
+        </template>
+
+        <br/>
+        <br/>
+        <template>
+        @Override<br/>
+        public Integer updateByPrimaryKeySelective(
+              <template v-for="(column,index) in setFields">
+                {{column.dataType}} {{column.camelName}}
+                <template v-if="index !== (clickedFields.length-1)">,</template>
+              </template>) {<br/>
+          
+              <template v-for="column in setFields">
+                <template v-if="column.dataType == 'Long'">
+                  {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}return 0; <br/>
+                  {{showTab(2)}}} <br/>
+                </template>
+                
+                <template v-if="column.dataType == 'Integer'">
+                  {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}return 0; <br/>
+                  {{showTab(2)}}} <br/>
+                </template>
+                
+                  <template v-if="column.dataType == 'String'">
+                    {{showTab(2)}}if (StringUtils.isBlank({{column.camelName}})) { <br/>
+                    {{showTab(2)}}{{showTab(2)}}return 0;<br/>
+                    {{showTab(2)}}}<br/>
+                </template>
+              </template>
+
+            {{showTab(2)}}{{table.pascalName}}PO entity = new {{table.pascalName}}PO();<br/>
+            
+            <template v-for="(column,index) in setFields">
+              <div>           
+              {{showTab(2)}}entity.set{{column.pascalName}}({{column.camelName}})<br/>
+                  <template v-if="index === (whereFields.length-1)">;</template>
+              </div>
+            </template>
+        
+            <br/>
+            {{showTab(2)}}return mapper.updateByPrimaryKeySelective(entity);<br/>
+        }
+        </template>
+   
+        <br/>
+        <br/>
+        <template>
+        @Override<br/>
+        public {{table.primaryKeyType}} add({{table.pascalName}}BO entityBO) {<br/>
+            {{showTab(2)}}if (entityBO == null) {<br/>
+                {{showTab(2)}}{{showTab(2)}}return 0;<br/>
+            {{showTab(2)}}}<br/>
+            {{showTab(2)}}{{table.pascalName}}PO entityPO = BeanConverter.copy(entityBO, {{table.pascalName}}PO.class);<br/>
+            {{showTab(2)}}mapper.insertSelective(entityPO);<br/>
+            {{showTab(2)}}return entityPO.getId();<br/>
+        }<br/>
+        </template>
+
+    </div>
+
+  
+    
+
+   
+  
   </div>
 
 
@@ -649,6 +721,13 @@ import { fail } from 'assert';
           this.clickedFields = [];
           this.orderFields = [];
       },
+      showTab(count) {
+          let result = "";
+          for(let i=0; i<count; i++){
+            result += "\u00a0\u00a0\u00a0";
+          }
+          return result + '\u00a0';
+      },
       pushField(field, pushType) {
           let contains = false;
           if(pushType == 1) {                  
@@ -710,19 +789,6 @@ import { fail } from 'assert';
           return this.magic.magicReturn + '<' + data + '>';
         }
         return data;
-      },addTab(count){
-        if(count == 1){
-          return '&emsp;';
-        }
-        if(count == 2){
-          return '&emsp;&emsp;';
-        }
-        if(count == 3){
-          return '&emsp;&emsp;&emsp;';
-        }
-        if(count == 4){
-          return '&emsp;&emsp;&emsp;&emsp;';
-        }
       }
     }
   }
@@ -744,5 +810,9 @@ import { fail } from 'assert';
 
   #publicClass,#publicMapper,#publicService,#showOther{
     margin: 10px;
+  }
+  
+  .codeStye {
+    padding-left: 50px;
   }
 </style>
