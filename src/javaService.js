@@ -12,9 +12,9 @@ const dataType = {
 };
 
 export const dataConvert = {
-  getMemberVariable(divContent){
+  getMemberVariable(divContent) {
     let inner = divContent.replace('\n', '').trim();
-    let member = dataConvert.getDuringStr(inner, "private", ";", false);  
+    let member = dataConvert.getDuringStr(inner, "private", ";", false);
 
     let definition = member.split(' ');
     return { memberType: definition[0], memberName: definition[1] }
@@ -45,7 +45,7 @@ export const dataConvert = {
     console.log(methodDefinition);
     return methodDefinition;
   },
-  getTable(divContent, filterColumns) {
+  getTableByJavaClass(divContent, filterColumns) {
     let create = "class";
     let comment = "/**";
     let lowercaseComment = "comment";
@@ -54,72 +54,194 @@ export const dataConvert = {
     let decimal = "DECIMAL";
 
     let tables = [];
+    if (divContent == undefined || divContent == null || divContent == '') {
+      return tables;
+    }
 
-    let inner = divContent.replace('\n', '');
-    let tableName = "";
-    if (inner.indexOf(create) > -1) {
+    let sourceStr = divContent.replace('\n', '');
+    sourceStr.split('}').forEach(inner => {
+      if (inner.trim() == '') {
+        return;
+      }
+      let tableName = "";
+      inner += "}";
       tableName = dataConvert.getDuringStr(inner, create, "{");
-    }
-    let columnBody = dataConvert.getDuringStr(inner, "{", "}", true);
-    let temp = inner.substring(inner.lastIndexOf("}"));
-    let tableDesc = "";
-
-    if (temp.indexOf(lowercaseComment) > -1) {
-      comment = lowercaseComment;
-    }
-    if (temp.indexOf(comment) > -1) {
-      tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);
-    }
-
-    let table = { name: tableName, description: tableDesc, columns: [] };
-
-    let arrayColumns = columnBody.split(';');
-    arrayColumns.forEach(function (value) {
-      if (value === "") return;
-
-      if (value.indexOf(constraint) > -1) {
+      if (tableName == '') {
         return;
       }
-      let column = {};
-      value = value.trim();
-      value = value.replace('unsigned', '');
-
-      let arrayResult = value.split(" ");
-      let columnName = arrayResult[arrayResult.length - 1];
-      if (columnName === '') {
-        return;
+      let columnBody = dataConvert.getDuringStr(inner, "{", "}", true);
+      if (columnBody == '') {
+        return '';
       }
-      if (filterColumns.indexOf(columnName) > -1) {
-        return;
-      }
+      let temp = inner.substring(inner.lastIndexOf("}"));
+      let tableDesc = "";
 
-      let dataType = arrayResult[arrayResult.length - 2];
-      let desc = "";
-
-      if (value.indexOf(comment) > -1) {
-        desc = dataConvert.getDuringStr(value, "/**", "*/");
-        desc = desc.replace('\n', '').replace('*', '').trim();
+      if (temp.indexOf(lowercaseComment) > -1) {
+        comment = lowercaseComment;
       }
-      column.name = columnName;
-      column.pascalName = dataConvert.getPascalName(columnName);
-      column.dataType = dataType;
-      column.description = desc;
-      column.camelName = dataConvert.getCamelName(columnName);
-
-      table.columns.push(column);
-      if (value.indexOf(primaryKey) > -1 || value.indexOf(primaryKey.toLocaleLowerCase()) > -1) {
-        table.primaryKey = columnName;
-        table.primaryKeyType = dataType;
-        table.primaryKeyCamel = column.camelName;
+      if (temp.indexOf(comment) > -1) {
+        tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);
       }
+      tableDesc = (tableDesc == '' ? tableName : tableDesc);
+      let table = { name: tableName, description: tableDesc, columns: [] };
+
+      let arrayColumns = columnBody.split(';');
+      arrayColumns.forEach(function (value) {
+        if (value === "") return;
+
+        if (value.indexOf(constraint) > -1) {
+          return;
+        }
+        let column = {};
+        value = value.trim();
+        value = value.replace('unsigned', '');
+
+        let arrayResult = value.split(" ");
+        let columnName = arrayResult[arrayResult.length - 1];
+        if (columnName === '') {
+          return;
+        }
+        if (filterColumns.indexOf(columnName) > -1) {
+          return;
+        }
+
+        let dataType = arrayResult[arrayResult.length - 2];
+        let desc = "";
+
+        if (value.indexOf(comment) > -1) {
+          desc = dataConvert.getDuringStr(value, "/**", "*/");
+          desc = desc.replace('\n', '').replace('*', '').trim();
+        }
+        column.name = columnName;
+        column.pascalName = dataConvert.getPascalNameForJava(columnName);
+        column.dataType = dataType;
+        column.description = desc;
+        column.camelName = dataConvert.getCamelName(columnName);
+
+        table.columns.push(column);
+        if (value.indexOf(primaryKey) > -1 || value.indexOf(primaryKey.toLocaleLowerCase()) > -1) {
+          table.primaryKey = columnName;
+          table.primaryKeyType = dataType;
+          table.primaryKeyCamel = column.camelName;
+        }
+      });
+      table.pascalName = dataConvert.getPascalNameForJava(table.name);
+      table.camelName = dataConvert.getCamelName(table.pascalName);
+      tables.push(table);
     });
-    table.pascalName = dataConvert.getPascalName(table.name);
-    table.camelName = dataConvert.getCamelName(table.pascalName);
-    tables.push(table);
 
     return tables;
   },
+  getTable(element, filterColumns) {
+    if (element == undefined || element == null || element == '') {
+      return [];
+    }
+    let create = "CREATE TABLE";
+    let comment = "COMMENT";
+    let lowercaseComment = "comment";
+    let primaryKey = "PRIMARY KEY";
+    let constraint = "CONSTRAINT";
+    let decimal = "DECIMAL";
+
+    let tables = [];
+    element.split(';').forEach(function (divContent) {
+      if (divContent.trim() == '') {
+        return;
+      }
+      let inner = divContent.replace('\n', '');
+      let tableName = "";
+      if (inner.indexOf(create) > -1) {
+        tableName = dataConvert.getDuringStr(inner, create, "(");
+      } else {
+        tableName = dataConvert.getDuringStr(inner, create.toLocaleLowerCase(), "(");
+      }
+      let columnBody = dataConvert.getDuringStr(inner, "(", ")", true);
+      let temp = inner.substring(inner.lastIndexOf(")"));
+      let tableDesc = "";
+
+      if (temp.indexOf(lowercaseComment) > -1) {
+        comment = lowercaseComment;
+      }
+      if (temp.indexOf(comment) > -1) {
+        tableDesc = dataConvert.getDuringStr(temp.split(comment)[1], "'", "'", true);
+      }
+
+      let table = { name: tableName, description: tableDesc, columns: [] };
+
+      let arrayColumns = columnBody.split(',');
+      let index = 0;
+      let isStart = 0;
+      for (let i = 0; i < arrayColumns.length; i++) {
+        if (isStart === 1) {
+          arrayColumns[index] += "," + arrayColumns[i];
+          if (arrayColumns[i].indexOf('\'') > -1) {
+            isStart = 0;
+          }
+          arrayColumns[i] = "";
+        }
+        if (arrayColumns[i].indexOf(comment) > -1) {
+          let comment_value = dataConvert.getDuringStr(arrayColumns[i], comment, '\'', true);
+
+          if (comment_value.split('\'').length !== 2) {
+            index = i;
+            isStart = 1;
+          }
+        } else if (arrayColumns[i].indexOf(decimal) > -1) {
+          if ((arrayColumns[i].indexOf(")") === -1)) {
+            arrayColumns[i] += ("," + arrayColumns[i + 1]);
+            arrayColumns[i + 1] = "";
+            --i;
+          }
+        }
+      }
+
+      arrayColumns.forEach(function (value) {
+        if (value === "") return;
+
+        if (value.indexOf(constraint) > -1) {
+          return;
+        }
+        let column = {};
+        value = value.trim();
+        value = value.replace('unsigned', '');
+        let columnName = dataConvert.getDuringStr(value, null, " ");
+        if (columnName === '') {
+          return;
+        }
+        if (filterColumns.indexOf(columnName) > -1) {
+          return;
+        }
+
+        let dataType = dataConvert.getDataType(value);
+        let desc = "";
+
+        if (value.indexOf(comment) > -1) {
+          desc = dataConvert.getDuringStr(value.split(comment)[1], "'", "'", true);
+        }
+        column.name = columnName;
+        column.pascalName = dataConvert.getPascalName(columnName);
+        column.dataType = dataType;
+        column.description = desc;
+        column.camelName = dataConvert.getCamelName(column.pascalName);
+
+        table.columns.push(column);
+        if (value.indexOf(primaryKey) > -1 || value.indexOf(primaryKey.toLocaleLowerCase()) > -1) {
+          table.primaryKey = columnName;
+          table.primaryKeyType = dataType;
+          table.primaryKeyCamel = column.camelName;
+        }
+      });
+      table.pascalName = dataConvert.getPascalName(table.name);
+      table.camelName = dataConvert.getCamelName(table.pascalName);
+
+      tables.push(table);
+    });
+    return tables;
+  },
   getPascalName(name) {
+    return dataConvert.toUpperCase(name).replace(/_/g, '');
+  },
+  getPascalNameForJava(name) {
     return name.substring(0, 1).toUpperCase() + name.substring(1);
   },
   getCamelName(name) {

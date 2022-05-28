@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div>
+    <div style="margin: 10px;">
       <i-select v-model="table" style="width:200px">
         <i-option v-for="item in tables" :value="item" :key="item">{{ item.description }}</i-option>
       </i-select>
@@ -9,9 +9,9 @@
       <i-button @click="showAction('showMapper')">manager me!</i-button>
       <i-button @click="showAction('showService')">service me!</i-button>
       <i-button @click="showAction('showSetter')">setter me!</i-button>
-      <!--<i-button @click="showAction('showEnum')">enum me!</i-button>-->
-      <i-button @click="showAction('showOther')">mock me!</i-button>
-      <i-button @click="showAction('showPythonSql')">python sql!</i-button>
+      <!-- <i-button @click="showAction('showEnum')">enum me!</i-button> -->
+      <!-- <i-button @click="showAction('showOther')">mock me!</i-button> -->
+      <!-- <i-button @click="showAction('showPythonSql')">python sql!</i-button> -->
       <i-button @click="clearClickFileds()">clearClickFileds</i-button>
 
       <span>{{msg}}</span>
@@ -30,8 +30,94 @@
         </template>
     </div> -->
 
-    <div id="create_table_script" ref="create_table_script">
+    <div id="create_class_script" ref="create_class_script" style="display: none;">
 
+public class SelfBuyOrderListDTO {
+
+    /**
+     * 商品id(本平台),  后端暂不用返回
+     */
+    private Long id;
+    /**
+     * 商品id(抖音平台)
+     */
+    private String itemId;
+    /**
+     * 1 自购省佣金 2分享赚取佣金
+     */
+    private Integer commissionType;
+    /**
+     * 佣金类型 0 普通佣金 1高佣商品
+     */
+    private Integer orderCommissionType;
+    /**
+     * 商品详情页链接
+     */
+    private String link;
+    /**
+     * 商品标题
+     */
+    private String title;
+    /**
+     * 商品封面图
+     */
+    private String coverImg;
+    /**
+     * 1 已付款 100 已退款 101 已完成
+     */
+    private Integer status;
+    /**
+     * 状态文案,"已付款"
+     */
+    private String statusContent;
+    /**
+     * icon 链接
+     */
+    private String icon;
+    /**
+     * icon 文字,抖音
+     */
+    private String iconContent;
+    /**
+     * 订单编号
+     */
+    private String orderId;
+    /**
+     * 1预计省、2已省、3分享赚、4已赚、5已失效
+     */
+    private Integer commissionContentStatus;
+    /**
+     * 佣金来源文案,预计省
+     */
+    private String commissionContent;
+    /**
+     * 佣金值
+     */
+    private Long commissionPrice;
+    /**
+     * 创建时间 2022-03-23 06:01:10
+     */
+    private Long createTime;
+    /**
+     * 确认到账时间
+     */
+    private Long settleTime;
+    /**
+     * 提示文案"预计确认收货后16天到账"
+     */
+    private String tipContent;
+    /**
+     * 付款金额 "￥9.9"
+     */
+    private Long price;
+}
+
+public class TestA {
+  private String userName;
+}
+    </div>
+
+    <div id="create_table_script" ref="create_table_script">
 create table task_hire_publish
 (
     id                        bigint unsigned auto_increment
@@ -66,7 +152,6 @@ create table task_hire_publish
     is_open_phone             tinyint unsigned default 0                 not null comment '0 允许对方电话联系 1允许',
     price_plus_weight         bigint unsigned  default 0                 not null comment '单价排序权重字段',
     reject_reason             varchar(2048)    default ''                not null comment '审核不通过原因',
-    
     ai_verify_status          int(10)          default 0                 not null comment '机审状态',
     ai_verify_time            int(11) unsigned default 0                 not null comment '机审时间戳',
     coin_return_flag          int unsigned     default 0                 not null comment '任务终止轻币是否处理flag 0 未处理  1已处理',
@@ -77,8 +162,6 @@ create table task_hire_publish
     is_deleted                tinyint          default 0                 not null
 )
     comment '牛人任务表';
-
-
     </div>
 
     <div style="display: inline-flex; padding:15px;">
@@ -87,9 +170,9 @@ create table task_hire_publish
           <template v-for="column in table.columns" >          
               <div class="columnStyle">               
                 <div style=""> {{column.pascalName}} </div>     
-                <div @click="pushField(column,1)" style="display: inline-block; cursor:pointer;">getter</div> 
-                <div @click="pushField(column,2)" style="display: inline-block; cursor:pointer; ">setter</div>
-                <div @click="pushField(column,3)" style="display: inline-block; cursor:pointer; ">orderby</div>         
+                <div @click="pushField(column,1)" style="display: inline-block; cursor:pointer;">Getter</div> 
+                <div @click="pushField(column,2)" style="display: inline-block; cursor:pointer; ">Setter</div>
+                <div @click="pushField(column,3)" style="display: inline-block; cursor:pointer; ">Orderby</div>         
               </div>
           </template>
       </div>
@@ -476,10 +559,17 @@ create table task_hire_publish
             </template>
           </div>
 
-          <div class="setterContent">
+          <div class="setterContent" style="margin-left: 10px;">
               <template v-for="column in table.columns">
               {{setter.to}}.set{{column.pascalName}}({{column.camelName}});
               <br/>
+            </template>
+          </div>
+
+          <div class="setterContent" style="margin-left: 10px;">
+            <template v-for="column in table.columns">
+            // {{column.description}}<br/>
+            .{{column.camelName}}({{setter.from}}.get{{column.pascalName}}())<br/>
             </template>
           </div>
         </div>
@@ -492,28 +582,22 @@ create table task_hire_publish
 
         public enum {{enumData.name}} {
         <br/>
-        UN_KNOW(0, "未知");
+        {{showTab(2)}}UN_KNOW(0, "未知");
         <br/>
-        private int value;
+        {{showTab(2)}}private int value;
         <br/>
-        private String name;
-        <br/>
-        <br/>
-        {{enumData.name}}(int value, String name) {
-        <br/>
-        this.value = value;
-        <br/>
-        this.name = name;
-        <br/>
-        }
+        {{showTab(2)}}private String name;
         <br/>
         <br/>
-
-        public String getName() {
+        {{showTab(2)}}{{enumData.name}}(int value, String name) {
         <br/>
-        return name;
+        {{showTab(2)}}{{showTab(2)}}this.value = value;
         <br/>
-        }
+        {{showTab(2)}}{{showTab(2)}}this.name = name;
+        <br/>
+        {{showTab(2)}}}
+        <br/>
+        <br/>
 
         <br/>
         @Override
@@ -661,7 +745,7 @@ create table task_hire_publish
 
 
 <script>
-  import {dataConvert} from '../service.js'
+  import {dataConvert} from '../javaService.js'
   import ISelect from "iview/src/components/select/select";
   import IOption from "iview/src/components/select/option";
 import { fail } from 'assert';
@@ -677,7 +761,7 @@ import { fail } from 'assert';
         visible: false,
         msg: '',
         table: '',
-        tables: '',        
+        tables: [],        
         orderFields: [],
         clickedFields: [],
         whereFields: [],
@@ -710,8 +794,23 @@ import { fail } from 'assert';
       };
     },
     mounted() {
-      this.tables = dataConvert.getTable(this.$refs.create_table_script.innerText, this.filter.columns);
-      this.table = this.tables[0];
+      let dbTables = dataConvert.getTable(this.$refs.create_table_script.innerText, this.filter.columns);    
+      let javaClasses = dataConvert.getTableByJavaClass(this.$refs.create_class_script.innerText, this.filter.columns);   
+      if(dbTables.length>0){
+        this.table = dbTables[0];
+      } else {
+        this.table = javaClasses[0];
+      }
+      dbTables.forEach(t=>{
+        if(t.columns.length != 0){
+          this.tables.push(t);
+        }
+      });
+      javaClasses.forEach(t=>{
+        if(t.columns.length != 0){
+          this.tables.push(t);
+        }
+      });
     },
     methods: {
       _(value) {

@@ -1,13 +1,14 @@
 <template>
   <div>
-    <i-select v-model="table" style="width:200px">
-      <i-option v-for="item in tables" :value="item" :key="item">{{ item.description }}</i-option>
-    </i-select>
+    <div style="margin: 10px;">
+      <!-- <i-select v-model="table" style="width:200px">
+        <i-option v-for="item in tables" :value="item" :key="item">{{ item.description }}</i-option>
+      </i-select> -->
 
-    <i-button @click="changeCopyValue('get')">get</i-button>
-    <i-button @click="changeCopyValue('post')">post</i-button>
+      <i-button @click="changeCopyValue('get')">get</i-button>
+      <i-button @click="changeCopyValue('post')">post</i-button>
 
-
+    </div>
     <span>{{msg}}</span>
     
     <div style="display: none;">
@@ -21,57 +22,143 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">    
-      ServiceResultVO{{_("Boolean")}} updateTask(TaskHirePublishPreCheckRequestBO requestBO)
+      List{{_("SelfBuyOrderListDTO")}} myCommissionOrderList(Long userId, Integer commissionStatus, Integer pageIndex, Integer pageSize);
     </div>
 
-    <div id="publicClass" v-if="show.showClass">
+    <div id="publicClass" v-if="show.showClass" style="display:inline-flex;">
 
-      <div class="publicClass BusinessOfService">
-        <pre>BusinessOfService</pre>
-       @Autowired <br/>
-       private {{ toBusiness(member.memberType) }} {{toBusiness(member.memberName)}};
-       
-        <!-- 方法头 -->
-        <div>
-              @Override <br/>
-              <span> public {{toBO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
-               
-                <template v-for="(column,index) in table.methodInParams">
-                    {{column.paramType}} {{column.paramName}}
-                    <span v-if="index !== (table.methodInParams.length-1)">,</span>
-                </template>
-              
-              <span>) {</span>           
-        </div>
-        <!-- 方法体 -->
-        <div>
+      <div style="margin-left: 10px;">
+        <div class="publicClass TarzanBusiness">
+          <pre>TarzanBusiness</pre>
+          <!-- 方法头 -->
           <div>
-            <template v-if="table.methodOutType.isList">
-                  &emsp;&emsp;return BeanConverter.copyList(
-            </template>
-            <template v-if="table.methodOutType.isBaseType">
-                  &emsp;&emsp;return {{toBO(copyBean)}}(
-            </template>                     
+                @Autowired <br/>
+                private {{ toManager(member.memberType) }} {{toManager(member.memberName)}}; <br/>
+                @Override <br/>
+                <span> public {{toVO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
+                
+                  <template v-for="(column,index) in table.methodInParams">
+                      <template v-if="column.paramDefinition.isBaseType">                                
+                      {{column.paramType}} {{column.paramName}}
+                      </template>
+                      <template v-else>                    
+                      {{toBO(column.paramType)}} {{column.paramName}}
+                      </template>
+                      <template v-if="index !== (table.methodInParams.length-1)">,</template>
+                  </template>
+                
+                <span>) {</span>           
           </div>
+          <!-- 方法体 -->
+          <div>
             <div>
-                &emsp;&emsp;&emsp;&emsp;&emsp; {{toBusiness(member.memberName)}}.{{table.methodName}} (
-                <span v-for="(column,index) in table.methodInParams">
-                  {{column.paramName}}
-                  <span v-if="index !== (table.methodInParams.length-1)">,</span>
-                </span>)
-                <div>
-                &emsp;&emsp;&emsp;&emsp;&emsp;, {{toBO(table.methodOutType.outTypeValue)}}.class);
-                </div>
+              
+              <template v-if="table.methodOutType.isList">
+                  <div>
+                    {{showTab(2)}}List{{_(toBO(table.methodOutType.outTypeValue))}} listBO = {{toManager(member.memberName)}}.{{table.methodName}} (
+                    <template v-for="(column,index) in table.methodInParams">
+                      {{column.paramName}}
+                      <template v-if="index !== (table.methodInParams.length-1)">,</template>
+                    </template>);
+                  </div>
+                  <div>
+                  {{showTab(2)}}return listBO.stream().map(this::convert).collect(Collectors.toList());
+                  </div>
+
+              </template>
+
+              <template v-if="table.methodOutType.isBaseType">
+                  <template v-if="getOrPost == 'get'">
+                    {{showTab(2)}} return convert({{toManager(member.memberName)}}.{{table.methodName}} (
+                    <template v-for="(column,index) in table.methodInParams">
+                      {{column.paramName}}
+                      <template v-if="index !== (table.methodInParams.length-1)">,</template>
+                    </template>));
+                  </template>
+                  
+                  <template v-if="getOrPost == 'post'">
+                    {{showTab(2)}} return {{toVO(copyBean)}}({{toManager(member.memberName)}}.{{table.methodName}} (
+                    <template v-for="(column,index) in table.methodInParams">
+                      {{column.paramName}}
+                      <template v-if="index !== (table.methodInParams.length-1)">,</template>
+                    </template>), {{table.methodOutType.outTypeValue}}.class);
+                  </template>
+                  
+              </template>    
+
+            </div>          
+            <div>
+              }
+            </div>
+
+
           </div>
+          
+
           <div>
+            <br/>
+            public {{toVO(table.methodOutType.outTypeValue)}} convert({{toBO(table.methodOutType.outTypeValue)}} entity) { <br/>
+            {{showTab(2)}}{{toVO(table.methodOutType.outTypeValue)}} result = BeanConverter.toBean(entity, {{toVO(table.methodOutType.outTypeValue)}}.class);<br/>
+            {{showTab(2)}}return result;<br/>
             }
           </div>
+          
         </div>
-        
+
+        <div class="publicClass TarzanManager">
+          <pre>TarzanManager</pre>
+          <!-- 方法头 -->
+          <div>
+                @DubboReference <br/>
+                private {{ toService(member.memberType) }} {{toService(member.memberName)}}; <br/>
+                @Override <br/>
+                <span> public {{toBO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
+                
+                  <template v-for="(column,index) in table.methodInParams">
+                      <template v-if="column.paramDefinition.isBaseType">                                
+                      {{column.paramType}} {{column.paramName}}
+                      </template>
+                      <template v-else>                    
+                      {{toBO(column.paramType)}} {{column.paramName}}
+                      </template>
+                      <template v-if="index !== (table.methodInParams.length-1)">,</template>
+                  </template>
+                
+                <span>) {</span>           
+          </div>
+          <!-- 方法体 -->
+          <div>
+            <div>
+                <template v-if="table.methodOutType.isList">
+                  {{showTab(2)}}return BeanConverter.copyList(
+                </template>
+                <template v-if="table.methodOutType.isBaseType">
+                  {{showTab(2)}}return {{toBO(copyBean)}}(
+                </template>                     
+                <br/>
+                {{showTab(2)}}{{showTab(2)}}&emsp;{{toService(member.memberName)}}.{{table.methodName}} (
+                <template v-for="(column,index) in table.methodInParams">
+                    <template v-if="column.paramDefinition.isBaseType">
+                    {{column.paramName}}
+                    </template>
+                    <template v-else>
+                    BeanConverter.copy({{column.paramName}}, {{toDTO(column.paramType)}}.class)
+                    </template>
+                    <template v-if="index !== (table.methodInParams.length-1)">,</template>
+                </template>)
+                <br/>
+                {{showTab(2)}}{{showTab(2)}}&emsp;, {{toBO(table.methodOutType.outTypeValue)}}.class);                
+                <br/>
+              }
+            </div>
+          </div>
+          
+        </div>
       </div>
 
-      <div class="publicClass Service">
-        <pre>Service</pre>
+      <div style="margin-left: 20px;">
+         <div class="publicClass ServiceAPI">
+        <pre>ServiceAPI</pre>
         <!-- 方法头 -->
         <div>
           @Autowired <br/>
@@ -96,14 +183,14 @@
         <div>
           <div>
             <template v-if="table.methodOutType.isList">
-                  &emsp;&emsp;return BeanConverter.copyList(
+                  {{showTab(2)}}return BeanConverter.copyList(
             </template>
             <template v-if="table.methodOutType.isBaseType">
-                  &emsp;&emsp;return {{toDTO(copyBean)}}(
+                  {{showTab(2)}}return {{toDTO(copyBean)}}(
             </template>                     
           </div>
             <div>
-                &emsp;&emsp;&emsp;&emsp;&emsp;{{toBusiness(member.memberName)}}.{{table.methodName}} (
+                {{showTab(2)}}{{showTab(2)}}&emsp;{{toBusiness(member.memberName)}}.{{table.methodName}} (
                 <template v-for="(column,index) in table.methodInParams">
                   <template v-if="column.paramDefinition.isBaseType">
                     {{column.paramName}}
@@ -114,141 +201,58 @@
                   <template v-if="index !== (table.methodInParams.length-1)">,</template>
                 </template>)
                 <br/>
-                &emsp;&emsp;&emsp;&emsp;&emsp;, {{toDTO(table.methodOutType.outTypeValue)}}.class);                
+                {{showTab(2)}}{{showTab(2)}}&emsp;, {{toDTO(table.methodOutType.outTypeValue)}}.class);                
           </div>
           <div>
             }
           </div>
         </div>
         
-      </div>
-
-      <div class="publicClass TarzanManager">
-        <pre>TarzanManager</pre>
-        <!-- 方法头 -->
-        <div>
-              @DubboReference <br/>
-              private {{ toService(member.memberType) }} {{toService(member.memberName)}}; <br/>
-              @Override <br/>
-              <span> public {{toBO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
-               
-                <template v-for="(column,index) in table.methodInParams">
-                    <template v-if="column.paramDefinition.isBaseType">                                
-                    {{column.paramType}} {{column.paramName}}
-                    </template>
-                    <template v-else>                    
-                    {{toBO(column.paramType)}} {{column.paramName}}
-                    </template>
-                    <template v-if="index !== (table.methodInParams.length-1)">,</template>
-                </template>
-              
-              <span>) {</span>           
-        </div>
-        <!-- 方法体 -->
-        <div>
-          <div>
-              <template v-if="table.methodOutType.isList">
-                &emsp;&emsp;return BeanConverter.copyList(
-              </template>
-              <template v-if="table.methodOutType.isBaseType">
-                &emsp;&emsp;return {{toBO(copyBean)}}(
-              </template>                     
-              <br/>
-              &emsp;&emsp;&emsp;&emsp;&emsp;{{toService(member.memberName)}}.{{table.methodName}} (
-              <template v-for="(column,index) in table.methodInParams">
-                  <template v-if="column.paramDefinition.isBaseType">
-                  {{column.paramName}}
-                  </template>
-                  <template v-else>
-                  BeanConverter.copy({{column.paramName}}, {{toDTO(column.paramType)}}.class)
-                  </template>
-                  <template v-if="index !== (table.methodInParams.length-1)">,</template>
-              </template>)
-              <br/>
-              &emsp;&emsp;&emsp;&emsp;&emsp;, {{toBO(table.methodOutType.outTypeValue)}}.class);                
-              <br/>
-            }
           </div>
-        </div>
-        
-      </div>
 
-
-      <div class="publicClass TarzanBusiness">
-        <pre>TarzanBusiness</pre>
-        <!-- 方法头 -->
-        <div>
-              @Autowired <br/>
-              private {{ toManager(member.memberType) }} {{toManager(member.memberName)}}; <br/>
-              @Override <br/>
-              <span> public {{toVO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
-               
-                <template v-for="(column,index) in table.methodInParams">
-                    <template v-if="column.paramDefinition.isBaseType">                                
-                    {{column.paramType}} {{column.paramName}}
+          <div class="publicClass ServiceBusiness">
+            <pre>ServiceBusiness</pre>
+          @Autowired <br/>
+          private {{ toBusiness(member.memberType) }} {{toBusiness(member.memberName)}};
+          
+            <!-- 方法头 -->
+            <div>
+                  @Override <br/>
+                  <span> public {{toBO(table.methodOutType.outTypeSource)}} {{table.methodName}} (</span>
+                  
+                    <template v-for="(column,index) in table.methodInParams">
+                        {{column.paramType}} {{column.paramName}}
+                        <span v-if="index !== (table.methodInParams.length-1)">,</span>
                     </template>
-                    <template v-else>                    
-                    {{toBO(column.paramType)}} {{column.paramName}}
-                    </template>
-                    <template v-if="index !== (table.methodInParams.length-1)">,</template>
+                  
+                  <span>) {</span>           
+            </div>
+            <!-- 方法体 -->
+            <div>
+              <div>
+                <template v-if="table.methodOutType.isList">
+                      {{showTab(2)}}return BeanConverter.copyList(
                 </template>
-              
-              <span>) {</span>           
-        </div>
-        <!-- 方法体 -->
-        <div>
-          <div>
+                <template v-if="table.methodOutType.isBaseType">
+                      {{showTab(2)}}return {{toBO(copyBean)}}(
+                </template>                     
+              </div>
+                <div>
+                    {{showTab(2)}}{{showTab(2)}}&emsp; {{toBusiness(member.memberName)}}.{{table.methodName}} (
+                    <span v-for="(column,index) in table.methodInParams">
+                      {{column.paramName}}
+                      <span v-if="index !== (table.methodInParams.length-1)">,</span>
+                    </span>)
+                    <div>
+                    {{showTab(2)}}{{showTab(2)}}&emsp;, {{toBO(table.methodOutType.outTypeValue)}}.class);
+                    </div>
+              </div>
+              <div>
+                }
+              </div>
+            </div>
             
-            <template v-if="table.methodOutType.isList">
-                <div>
-                  &emsp;&emsp;List{{_(toBO(table.methodOutType.outTypeValue))}} listBO = {{toManager(member.memberName)}}.{{table.methodName}} (
-                  <template v-for="(column,index) in table.methodInParams">
-                    {{column.paramName}}
-                    <template v-if="index !== (table.methodInParams.length-1)">,</template>
-                  </template>);
-                </div>
-                <div>
-                &emsp;&emsp;return listBO.stream().map(this::convert).collect(Collectors.toList());
-                </div>
-
-            </template>
-
-            <template v-if="table.methodOutType.isBaseType">
-                <template v-if="getOrPost == 'get'">
-                  &emsp;&emsp; return convert({{toManager(member.memberName)}}.{{table.methodName}} (
-                  <template v-for="(column,index) in table.methodInParams">
-                    {{column.paramName}}
-                    <template v-if="index !== (table.methodInParams.length-1)">,</template>
-                  </template>));
-                </template>
-                
-                <template v-if="getOrPost == 'post'">
-                  &emsp;&emsp; return {{toVO(copyBean)}}({{toManager(member.memberName)}}.{{table.methodName}} (
-                  <template v-for="(column,index) in table.methodInParams">
-                    {{column.paramName}}
-                    <template v-if="index !== (table.methodInParams.length-1)">,</template>
-                  </template>), {{table.methodOutType.outTypeValue}}.class);
-                </template>
-                
-            </template>    
-
-          </div>          
-          <div>
-            }
           </div>
-
-
-        </div>
-        
-
-        <div>
-          <br/>
-          public {{toVO(table.methodOutType.outTypeValue)}} convert({{toBO(table.methodOutType.outTypeValue)}} entity) { <br/>
-          &emsp;&emsp;{{toVO(table.methodOutType.outTypeValue)}} result = BeanConverter.toBean(entity, {{toVO(table.methodOutType.outTypeValue)}}.class);<br/>
-          &emsp;&emsp;return result;<br/>
-          }
-        </div>
-        
       </div>
 
     </div>
@@ -325,6 +329,13 @@ import { fail } from 'assert';
         if (index < length - 1) {
           return symbol;
         }
+      },
+      showTab(count) {
+          let result = "";
+          for(let i=0; i<count; i++){
+            result += "\u00a0\u00a0\u00a0";
+          }
+          return result + '\u00a0';
       },
       changeCopyValue(data){
           this.copyBean = data;

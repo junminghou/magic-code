@@ -21,7 +21,10 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-      
+
+/**
+* 测试表
+*/
 public class SelfBuyOrderListDTO {
 
     /**
@@ -733,7 +736,7 @@ import { fail } from 'assert';
       };
     },
     mounted() {
-      this.tables = dataConvert.getTable(this.$refs.create_table_script.innerText, this.filter.columns);
+      this.tables = dataConvert.getTableByJavaClass(this.$refs.create_table_script.innerText, this.filter.columns);
       this.table = this.tables[0];
     },
     methods: {
