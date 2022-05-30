@@ -15,14 +15,15 @@
       
     List{{_("SelfBuyOrderListDTO")}} myCommissionOrderList(Long userId, Integer commissionStatus, Integer pageIndex, Integer pageSize);
     ServiceResultBO{{_("FollowRoomPreCheckResBO")}} applyPreCheck(FollowRoomApplyPreCheckRequestBO checkRequest);
+    List{{_("SelfBuyOrderListDTO")}} myCommissionOrderList(Long userId, Integer commissionStatus, Integer pageIndex, Integer pageSize);
     </div>
 
     <div id="class_member_script" ref="class_member_script">
-      private TaskHirePublishManager publishManager;
+      private TaskHireCommentService commentService;
     </div>
 
     <div id="create_table_script" ref="create_table_script">    
-      List{{_("SelfBuyOrderListDTO")}} myCommissionOrderList(Long userId, Integer commissionStatus, Integer pageIndex, Integer pageSize);
+      List{{_("TaskHireReviewDTO")}} getReviewListByApplyIdList(List{{_("Long")}} applyIdList);
     </div>
 
     <div id="publicClass" v-if="show.showClass" style="display:inline-flex;">
@@ -62,6 +63,7 @@
                     </template>);
                   </div>
                   <div>
+                  {{showTab(2)}}listBO.stream().collect(Collectors.toMap({{toBO(table.methodOutType.outTypeValue)}}:, e -> e)); <br/> <br/>
                   {{showTab(2)}}return listBO.stream().map(this::convert).collect(Collectors.toList());
                   </div>
 
@@ -136,7 +138,7 @@
                   {{showTab(2)}}return {{toBO(copyBean)}}(
                 </template>                     
                 <br/>
-                {{showTab(2)}}{{showTab(2)}}&emsp;{{toService(member.memberName)}}.{{table.methodName}} (
+                {{showTab(2)}}{{showTab(2)}}{{toService(member.memberName)}}.{{table.methodName}} (
                 <template v-for="(column,index) in table.methodInParams">
                     <template v-if="column.paramDefinition.isBaseType">
                     {{column.paramName}}
@@ -147,7 +149,7 @@
                     <template v-if="index !== (table.methodInParams.length-1)">,</template>
                 </template>)
                 <br/>
-                {{showTab(2)}}{{showTab(2)}}&emsp;, {{toBO(table.methodOutType.outTypeValue)}}.class);                
+                {{showTab(2)}}{{showTab(2)}}, {{toBO(table.methodOutType.outTypeValue)}}.class);                
                 <br/>
               }
             </div>
@@ -190,7 +192,7 @@
             </template>                     
           </div>
             <div>
-                {{showTab(2)}}{{showTab(2)}}&emsp;{{toBusiness(member.memberName)}}.{{table.methodName}} (
+                {{showTab(2)}}{{showTab(2)}}{{toBusiness(member.memberName)}}.{{table.methodName}} (
                 <template v-for="(column,index) in table.methodInParams">
                   <template v-if="column.paramDefinition.isBaseType">
                     {{column.paramName}}
@@ -201,7 +203,7 @@
                   <template v-if="index !== (table.methodInParams.length-1)">,</template>
                 </template>)
                 <br/>
-                {{showTab(2)}}{{showTab(2)}}&emsp;, {{toDTO(table.methodOutType.outTypeValue)}}.class);                
+                {{showTab(2)}}{{showTab(2)}}, {{toDTO(table.methodOutType.outTypeValue)}}.class);                
           </div>
           <div>
             }
@@ -238,13 +240,13 @@
                 </template>                     
               </div>
                 <div>
-                    {{showTab(2)}}{{showTab(2)}}&emsp; {{toBusiness(member.memberName)}}.{{table.methodName}} (
+                    {{showTab(2)}}{{showTab(2)}} {{toBusiness(member.memberName)}}.{{table.methodName}} (
                     <span v-for="(column,index) in table.methodInParams">
                       {{column.paramName}}
                       <span v-if="index !== (table.methodInParams.length-1)">,</span>
                     </span>)
                     <div>
-                    {{showTab(2)}}{{showTab(2)}}&emsp;, {{toBO(table.methodOutType.outTypeValue)}}.class);
+                    {{showTab(2)}}{{showTab(2)}}, {{toBO(table.methodOutType.outTypeValue)}}.class);
                     </div>
               </div>
               <div>

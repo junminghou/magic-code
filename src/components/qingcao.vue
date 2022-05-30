@@ -32,88 +32,21 @@
 
     <div id="create_class_script" ref="create_class_script" style="display: none;">
 
-public class SelfBuyOrderListDTO {
+public class TempJsonClass {
+  /**
+     * 评论状态, 0: 未评论, 1: 好评, 2: 差评
+     */
+    private Integer commentStatus;
 
     /**
-     * 商品id(本平台),  后端暂不用返回
+     * 评论内容
      */
-    private Long id;
-    /**
-     * 商品id(抖音平台)
-     */
-    private String itemId;
-    /**
-     * 1 自购省佣金 2分享赚取佣金
-     */
-    private Integer commissionType;
-    /**
-     * 佣金类型 0 普通佣金 1高佣商品
-     */
-    private Integer orderCommissionType;
-    /**
-     * 商品详情页链接
-     */
-    private String link;
-    /**
-     * 商品标题
-     */
-    private String title;
-    /**
-     * 商品封面图
-     */
-    private String coverImg;
-    /**
-     * 1 已付款 100 已退款 101 已完成
-     */
-    private Integer status;
-    /**
-     * 状态文案,"已付款"
-     */
-    private String statusContent;
-    /**
-     * icon 链接
-     */
-    private String icon;
-    /**
-     * icon 文字,抖音
-     */
-    private String iconContent;
-    /**
-     * 订单编号
-     */
-    private String orderId;
-    /**
-     * 1预计省、2已省、3分享赚、4已赚、5已失效
-     */
-    private Integer commissionContentStatus;
-    /**
-     * 佣金来源文案,预计省
-     */
-    private String commissionContent;
-    /**
-     * 佣金值
-     */
-    private Long commissionPrice;
-    /**
-     * 创建时间 2022-03-23 06:01:10
-     */
-    private Long createTime;
-    /**
-     * 确认到账时间
-     */
-    private Long settleTime;
-    /**
-     * 提示文案"预计确认收货后16天到账"
-     */
-    private String tipContent;
-    /**
-     * 付款金额 "￥9.9"
-     */
-    private Long price;
-}
+    private String commentContent;
 
-public class TestA {
-  private String userName;
+    /**
+     * 允许编辑评论, 1: 允许编辑, 0: 不允许编辑
+     */
+    private Integer commentAllowEdit;
 }
     </div>
 
