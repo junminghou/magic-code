@@ -186,7 +186,7 @@ export const dataConvert = {
             index = i;
             isStart = 1;
           }
-        } else if (arrayColumns[i].indexOf(decimal) > -1) {
+        } else if (arrayColumns[i].indexOf(decimal) > -1 || arrayColumns[i].indexOf(decimal.toLocaleLowerCase()) > -1 ) {
           if ((arrayColumns[i].indexOf(")") === -1)) {
             arrayColumns[i] += ("," + arrayColumns[i + 1]);
             arrayColumns[i + 1] = "";

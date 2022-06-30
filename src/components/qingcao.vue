@@ -32,69 +32,11 @@
 
     <div id="create_class_script" ref="create_class_script" style="display: none;">
 
-public class TempJsonClass {
-  /**
-     * 评论状态, 0: 未评论, 1: 好评, 2: 差评
-     */
-    private Integer commentStatus;
-
-    /**
-     * 评论内容
-     */
-    private String commentContent;
-
-    /**
-     * 允许编辑评论, 1: 允许编辑, 0: 不允许编辑
-     */
-    private Integer commentAllowEdit;
-}
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-create table task_hire_publish
-(
-    id                        bigint unsigned auto_increment
-        primary key,
-    user_id                   bigint unsigned  default 0                 not null comment '发布任务的uid',
-    app_type                  int unsigned     default 0                 not null comment 'app类型 0 轻抖APP 1 轻草提词器 2 轻草',
-    task_status               tinyint unsigned default 0                 not null comment '任务状态',
-    task_platform_id          int unsigned     default 0                 not null comment '任务平台ID',
-    task_type_id              int unsigned     default 0                 not null comment '任务类型ID',
-    flag                      int unsigned     default 0                 not null comment '特殊标识位0:无 1:抖音平台',
-    publish_service_fee_ratio int unsigned     default 0                 not null comment '发布者服务费率,万分比',
-    apply_service_fee_ratio   int unsigned     default 0                 not null comment '接单人服务费率，万分比',
-    credit_day                int unsigned     default 0                 not null comment '接单人完成后账期,单位为天',
-    service_fee               bigint unsigned  default 0                 not null comment '发布者服务费,单位为分,出现厘多收到分',
-    publish_service_fee_flag  int unsigned     default 0                 not null comment '发布者服务费收取标识位',
-    task_money_per            bigint unsigned  default 0                 not null comment '单次任务赏金',
-    send_money_count          int              default 0                 not null comment '已经打款的报名数量',
-    task_money_all            bigint unsigned  default 0                 not null comment '任务总金额（分为单位）',
-    task_money_all_pay        bigint unsigned  default 0                 not null comment '发布任务总支付金额(分为单位)',
-    task_content              varchar(2048)    default ''                not null comment '任务要求',
-    task_apply_limit          int unsigned     default 0                 not null comment '任务报名人数限制（总名额）',
-    task_apply_progress       int unsigned     default 0                 not null comment '任务报名进度对应人数（已通过）',
-    task_apply_all            int unsigned     default 0                 not null comment '任务报名成功总数',
-    task_publish_time         int(11) unsigned default 0                 not null comment '任务发布时间',
-    task_cancel_time          int(11) unsigned default 0                 not null comment '任务取消时间 用户手动终止任务时间',
-    task_start_time           int(11) unsigned default 0                 not null comment '任务开始时间',
-    task_end_time             int(11) unsigned default 0                 not null comment '任务结束时间',
-    task_fans_require         bigint unsigned  default 0                 not null comment '粉丝数要求',
-    task_image                varchar(1024)    default ''                not null comment '任务图片JSON结构数据',
-    task_link                 varchar(8192)    default ''                not null comment '任务链接JSON结构数据',
-    task_phone                varchar(32)      default ''                not null comment '任务联系手机',
-    is_open_phone             tinyint unsigned default 0                 not null comment '0 允许对方电话联系 1允许',
-    price_plus_weight         bigint unsigned  default 0                 not null comment '单价排序权重字段',
-    reject_reason             varchar(2048)    default ''                not null comment '审核不通过原因',
-    ai_verify_status          int(10)          default 0                 not null comment '机审状态',
-    ai_verify_time            int(11) unsigned default 0                 not null comment '机审时间戳',
-    coin_return_flag          int unsigned     default 0                 not null comment '任务终止轻币是否处理flag 0 未处理  1已处理',
-    thumbs_up_count           bigint unsigned  default 0                 not null comment '好评数',
-    thumbs_down_count         bigint unsigned  default 0                 not null comment '差评数',
-    create_time               datetime         default CURRENT_TIMESTAMP not null,
-    update_time               datetime         default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
-    is_deleted                tinyint          default 0                 not null
-)
-    comment '牛人任务表';
+
+
     </div>
 
     <div style="display: inline-flex; padding:15px;">
@@ -487,6 +429,7 @@ create table task_hire_publish
         <div style="display: inline-flex;">
           <div class="setterContent">
             <template v-for="column in table.columns">
+              // {{column.description}}<br/>
               {{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());
               <br/>
             </template>
@@ -494,6 +437,7 @@ create table task_hire_publish
 
           <div class="setterContent" style="margin-left: 10px;">
               <template v-for="column in table.columns">
+              // {{column.description}}<br/>
               {{setter.to}}.set{{column.pascalName}}({{column.camelName}});
               <br/>
             </template>
