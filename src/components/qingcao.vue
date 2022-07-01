@@ -36,7 +36,6 @@
 
     <div id="create_table_script" ref="create_table_script">
 
-
     </div>
 
     <div style="display: inline-flex; padding:15px;">
@@ -58,10 +57,11 @@
             public class {{table.pascalName}} {
           </div>
        
-          <div v-for="column in table.columns">
+          <div v-for="(column,index) in table.columns">
             {{showTab(2)}} /** <br>
             {{showTab(2)}} &nbsp; * {{column.description}}<br>
             {{showTab(2)}} &nbsp; */<br>
+            {{showTab(2)}} @ExcelProperty(value = "{{column.description}}", index = {{index}}) <br>
             {{showTab(2)}}<span> private {{column.dataType}} {{column.camelName}};</span>
           </div>
 
@@ -421,7 +421,7 @@
         </div>
       </div>
 
-      <div id="setter" v-if="show.showSetter" >
+      <div id="setter" v-if="show.showSetter" style="margin-left:50px;">
         <div>
           <Input v-model="setter.from" placeholder="from" style="width: 100px" size="small"/>
           <Input v-model="setter.to" placeholder="to" style="width: 100px" size="small"/>
@@ -429,9 +429,8 @@
         <div style="display: inline-flex;">
           <div class="setterContent">
             <template v-for="column in table.columns">
-              // {{column.description}}<br/>
-              {{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());
-              <br/>
+              &nbsp;// {{column.description}}<br/>            
+              &nbsp;{{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());<br/>
             </template>
           </div>
 
@@ -447,6 +446,21 @@
             <template v-for="column in table.columns">
             // {{column.description}}<br/>
             .{{column.camelName}}({{setter.from}}.get{{column.pascalName}}())<br/>
+            </template>
+          </div>
+
+          <div class="setterContent" style="margin-left: 10px; display: none;">
+            <template v-for="column in table.columns">
+              &nbsp;// {{column.description}}<br/>
+              <template v-if="column.dataType == 'BigDecimal'">
+              &nbsp;{{setter.to}}.set{{column.pascalName}}(defautValue({{setter.to}}.get{{column.pascalName}}()).add({{setter.from}}.get{{column.pascalName}}()));<br/>
+              </template>
+              <template v-else-if="column.dataType == 'String' || column.dataType == 'Date'">
+              &nbsp;{{setter.to}}.set{{column.pascalName}}({{setter.from}}.get{{column.pascalName}}());<br/>
+              </template>
+              <template v-else>
+              &nbsp;{{setter.to}}.set{{column.pascalName}}(defautValue({{setter.to}}.get{{column.pascalName}}()) + {{setter.from}}.get{{column.pascalName}}());<br/>
+              </template>
             </template>
           </div>
         </div>
