@@ -21,7 +21,35 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-
+create table follow_room_statistic
+(
+    id                  bigint unsigned auto_increment
+        primary key,
+    app_type            int unsigned    default 0                    not null,
+    room_id             bigint unsigned default 0                    not null comment '房间Id',
+    room_capacity       int unsigned    default 0                    not null comment '房间容量',
+    user_id             bigint unsigned default 0                    not null comment '房主',
+    publish_time        int unsigned    default 0                    not null comment '房间创建时间',
+    join_num            int unsigned    default 0                    not null comment '成员人数',
+    follow_rate         decimal(18, 2)  default 0.00                 not null comment '关注率',
+    mutual_follow_rate  decimal(18, 2)  default 0.00                 not null comment '互关率',
+    upload_image_rate   decimal(18, 2)  default 0.00                 not null comment '上传截图率',
+    check_image_rate    decimal(18, 2)  default 0.00                 not null comment '审核截图率',
+    earn_money          int unsigned    default 0                    not null comment '已收收益',
+    create_money        int unsigned    default 0                    not null comment '开房费用',
+    join_money          int unsigned    default 0                    not null comment '总进房费用',
+    owner_bonus_money   int unsigned    default 0                    not null comment '房主开放分红',
+    owner_invite_money  int unsigned    default 0                    not null comment '房主拉人返利',
+    member_invite_money int unsigned    default 0                    not null comment '成员拉人返利',
+    lottery_money       int unsigned    default 0                    not null comment '奖品支出',
+    owner_invite_num    int unsigned    default 0                    not null comment '房主拉付费人',
+    member_invite_num   int unsigned    default 0                    not null comment '成员拉付费人',
+    update_date         int unsigned    default 0                    not null comment '更新时间',
+    create_time         datetime(3)     default CURRENT_TIMESTAMP(3) not null,
+    update_time         datetime(3)     default CURRENT_TIMESTAMP(3) not null on update CURRENT_TIMESTAMP(3),
+    is_deleted          tinyint(3)      default 0                    not null
+)
+    comment '互关房房间统计数据';
 
     </div>
 

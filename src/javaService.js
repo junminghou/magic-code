@@ -212,6 +212,7 @@ export const dataConvert = {
           return;
         }
 
+        let specialType = dataConvert.getSpecialType(value);
         let dataType = dataConvert.getDataType(value);
         let desc = "";
 
@@ -223,12 +224,15 @@ export const dataConvert = {
         column.dataType = dataType;
         column.description = desc;
         column.camelName = dataConvert.getCamelName(column.pascalName);
+        column.specialType = specialType;
+        column.isPK = false;
 
         table.columns.push(column);
         if (value.indexOf(primaryKey) > -1 || value.indexOf(primaryKey.toLocaleLowerCase()) > -1) {
           table.primaryKey = columnName;
           table.primaryKeyType = dataType;
           table.primaryKeyCamel = column.camelName;
+          column.isPK = true;
         }
       });
       table.pascalName = dataConvert.getPascalName(table.name);
@@ -250,6 +254,28 @@ export const dataConvert = {
   toUpperCase(str) {
     return str.toLowerCase().replace(/(_|^)[a-z]/g, (L) => L.toUpperCase());
   },
+  getSpecialType(value){
+    const specialType = { money: false, like: false, percent: false, time: false };
+    
+    if (value.indexOf("@money") > -1) {
+      specialType.money = true;
+      value = value.replace(/@money/g,'');
+    }
+    if (value.indexOf("@like") > -1) {
+      specialType.like = true;
+      value = value.replace(/@like/g,'');
+    }
+    if (value.indexOf("@percent") > -1) {
+      specialType.percent = true;
+      value = value.replace(/@percent/g,'');
+    }
+    if (value.indexOf("@time") > -1) {
+      specialType.time = true;
+      value = value.replace(/@time/g,'');
+    }
+
+    return specialType;
+  },
   getDataType(value) {
     if (value.indexOf(dataType.java.String) > -1 || value.indexOf(dataType.java.String.toLocaleLowerCase()) > -1) {
       return "String";
@@ -261,10 +287,10 @@ export const dataConvert = {
       return "Integer";
     }
     if (value.indexOf(dataType.java.Date) > -1 || value.indexOf(dataType.java.Date.toLocaleLowerCase()) > -1) {
-      return "Date";
+      return "LocalDateTime";
     }
     if (value.indexOf(dataType.java.Timestamp) > -1 || value.indexOf(dataType.java.Timestamp.toLocaleLowerCase()) > -1) {
-      return "Date";
+      return "LocalDateTime";
     }
     if (value.indexOf(dataType.java.BigDecimal) > -1 || value.indexOf(dataType.java.BigDecimal.toLocaleLowerCase()) > -1) {
       return "BigDecimal";

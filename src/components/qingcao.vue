@@ -35,6 +35,7 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
+      
 
     </div>
 
@@ -54,15 +55,27 @@
       <div id="publicClass" v-if="show.showClass" style="display: inline-flex;">
         <div class="publicClass">
           <div>
+            @Data<br>
+            @Builder<br>
+            @AllArgsConstructor<br>
+            @NoArgsConstructor<br>          
+            @Table(name = "{{table.name}}")<br>
             public class {{table.pascalName}} {
           </div>
        
-          <div v-for="(column,index) in table.columns">
+          <div v-for="(column,index) in table.columns">            
+            <template v-if="column.isPK">
+            {{showTab(2)}}@Id<br>
+            {{showTab(2)}}@GeneratedValue(strategy = GenerationType.IDENTITY)<br>
+            {{showTab(2)}}<span> private {{column.dataType}} {{column.camelName}};</span>
+            </template>
+            <template v-else>
             {{showTab(2)}} /** <br>
             {{showTab(2)}} &nbsp; * {{column.description}}<br>
             {{showTab(2)}} &nbsp; */<br>
-            {{showTab(2)}} @ExcelProperty(value = "{{column.description}}", index = {{index}}) <br>
+            <!-- {{showTab(2)}} @ExcelProperty(value = "{{column.description}}", index = {{index}}) <br> -->
             {{showTab(2)}}<span> private {{column.dataType}} {{column.camelName}};</span>
+            </template>
           </div>
 
           <div>
@@ -72,12 +85,32 @@
 
         
         <div class="publicClassQuery">
+          @Data<br>
+          @Builder<br>
+          @AllArgsConstructor<br>
+          @NoArgsConstructor<br>   
           public class {{table.pascalName}}Query extends {{table.pascalName}} {
           <br/>
           <template v-for="column in table.columns">
-            <template v-if="column.dataType === 'String'">
+        
+            <template v-if="column.specialType.like">
+              {{showTab(2)}} /** <br>
+              {{showTab(2)}} &nbsp; * {{column.description}}<br>
+              {{showTab(2)}} &nbsp; */<br>
               {{showTab(2)}} private {{column.dataType}} like{{column.pascalName}};
-              <br/>
+              <br>
+            </template>
+            <template v-else-if="column.specialType.time">
+              {{showTab(2)}} /** <br>
+              {{showTab(2)}} &nbsp; * {{column.description}}<br>
+              {{showTab(2)}} &nbsp; */<br>
+              {{showTab(2)}} private {{column.dataType}} {{column.camelName}}Begin;          
+              <br>              
+              {{showTab(2)}} /** <br>
+              {{showTab(2)}} &nbsp; * {{column.description}}<br>
+              {{showTab(2)}} &nbsp; */<br>
+              {{showTab(2)}} private {{column.dataType}} {{column.camelName}}End;
+              </br>
             </template>
           </template>
           }
@@ -98,7 +131,7 @@
               <template v-for="column in clickedFields">
 
                 <template v-if="column.dataType == 'Long'">
-                  if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+                  {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
                   {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
                   {{showTab(2)}}} <br/>
                 </template>
@@ -201,7 +234,7 @@
             {{showTab(2)}}} <br/>
             {{showTab(2)}}if (Optional.ofNullable(option.getOrderValue()).orElse(0) > 0) { <br/>      
               <template v-for="(column,index) in orderFields">    
-                {{showTab(2)}}{{showTab(2)}}if (option.getOrderValue() == 1) { <br/>
+                {{showTab(2)}}{{showTab(2)}}if (option.getOrderValue() == {{index+1}}) { <br/>
                     {{showTab(2)}}{{showTab(2)}}{{showTab(2)}}orderStr = " {{column.name}} " + ascOrDesc; <br/>
                 {{showTab(2)}}{{showTab(2)}}} <br/>
               </template>    
@@ -317,6 +350,51 @@
                 {{showTab(2)}}mapper.insertSelective(entityPO);<br/>
                 {{showTab(2)}}return entityPO.getId();<br/>
             }<br/>
+            </template>
+            <br/>
+            <template>
+              @Override<br/>
+              public {{table.pascalName+"BO"}} findOne(
+                <template v-for="(column,index) in clickedFields">
+                  {{column.dataType}} {{column.camelName}}
+                  <template v-if="index !== (clickedFields.length-1)">,</template>
+                </template>) {<br/>
+                
+                <template v-for="column in clickedFields">
+                  <template v-if="column.dataType == 'Long'">
+                    {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+                    {{showTab(2)}}{{showTab(2)}}return null; <br/>
+                    {{showTab(2)}}} <br/>
+                  </template>
+                  
+                  <template v-if="column.dataType == 'Integer'">
+                    {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
+                    {{showTab(2)}}{{showTab(2)}}return null; <br/>
+                    {{showTab(2)}}} <br/>
+                  </template>
+                  
+                    <template v-if="column.dataType == 'String'">
+                      {{showTab(2)}}if (StringUtils.isBlank({{column.camelName}})) { <br/>
+                      {{showTab(2)}}{{showTab(2)}}return null;<br/>
+                      {{showTab(2)}}}<br/>
+                  </template>
+                </template>
+              <br/>
+
+                  {{showTab(2)}}Example example = new Example({{table.pascalName}}PO.class);<br/>
+                  {{showTab(2)}}example.createCriteria()<br/>
+                  <template v-for="(column,index) in whereFields">
+                    <div>
+                      {{showTab(2)}}{{showTab(2)}}.andEqualTo("{{column.camelName}}", {{column.camelName}})
+                      <template v-if="index === (whereFields.length-1)">;</template>
+                    </div>
+                  </template>                            
+                  {{showTab(2)}}example.setOrderByClause("id desc limit 1");                  
+                  <br/>
+                
+                  {{showTab(2)}}{{table.pascalName+"PO"}} {{table.camelName}} = mapper.selectOneByExample(example);<br/>                
+                  {{showTab(2)}}return BeanConverter.copy({{table.camelName}}, {{table.pascalName}}BO.class);<br/>
+              }<br/>
             </template>
 
         </div>
@@ -436,8 +514,8 @@
 
           <div class="setterContent" style="margin-left: 10px;">
               <template v-for="column in table.columns">
-              // {{column.description}}<br/>
-              {{setter.to}}.set{{column.pascalName}}({{column.camelName}});
+               &nbsp;// {{column.description}}<br/>
+               &nbsp;{{setter.to}}.set{{column.pascalName}}({{column.camelName}});
               <br/>
             </template>
           </div>

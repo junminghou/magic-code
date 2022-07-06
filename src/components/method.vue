@@ -18,12 +18,14 @@
     List{{_("SelfBuyOrderListDTO")}} myCommissionOrderList(Long userId, Integer commissionStatus, Integer pageIndex, Integer pageSize);
     </div>
 
-    <div id="class_member_script" ref="class_member_script">
-      private TaskHireCommentService commentService;
+    <div id="class_member_script" ref="class_member_script">    
+      private FollowRoomMemberActionManager actionManager;
     </div>
 
-    <div id="create_table_script" ref="create_table_script">    
-      List{{_("TaskHireReviewDTO")}} getReviewListByApplyIdList(List{{_("Long")}} applyIdList);
+<!-- List{{_("FollowRoomMemberActionBO")}} findUploadImageList(Long roomId, Long fromMemberId); -->
+<!-- Integer backstageApprovalFail(Long roomId, Long fromMemberId, Long toMemberId, Integer actionType, Long actionId); -->
+    <div id="create_table_script" ref="create_table_script">                
+        List{{_("FollowRoomUserLotteryBO")}} findLotteryList(Long roomId, Long userId);
     </div>
 
     <div id="publicClass" v-if="show.showClass" style="display:inline-flex;">
