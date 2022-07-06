@@ -96,6 +96,8 @@ export const dataConvert = {
         value = value.trim();
         value = value.replace('unsigned', '');
 
+        let specialType = dataConvert.getSpecialType(value);     
+        value = specialType.value;
         let arrayResult = value.split(" ");
         let columnName = arrayResult[arrayResult.length - 1];
         if (columnName === '') {
@@ -117,12 +119,15 @@ export const dataConvert = {
         column.dataType = dataType;
         column.description = desc;
         column.camelName = dataConvert.getCamelName(columnName);
+        column.specialType = specialType.specialFiled;
+        column.isPK = false;
 
         table.columns.push(column);
         if (value.indexOf(primaryKey) > -1 || value.indexOf(primaryKey.toLocaleLowerCase()) > -1) {
           table.primaryKey = columnName;
           table.primaryKeyType = dataType;
           table.primaryKeyCamel = column.camelName;
+          column.isPK = true;
         }
       });
       table.pascalName = dataConvert.getPascalNameForJava(table.name);
@@ -213,6 +218,7 @@ export const dataConvert = {
         }
 
         let specialType = dataConvert.getSpecialType(value);
+        value = specialType.value;
         let dataType = dataConvert.getDataType(value);
         let desc = "";
 
@@ -224,7 +230,7 @@ export const dataConvert = {
         column.dataType = dataType;
         column.description = desc;
         column.camelName = dataConvert.getCamelName(column.pascalName);
-        column.specialType = specialType;
+        column.specialType = specialType.specialFiled;
         column.isPK = false;
 
         table.columns.push(column);
@@ -255,7 +261,7 @@ export const dataConvert = {
     return str.toLowerCase().replace(/(_|^)[a-z]/g, (L) => L.toUpperCase());
   },
   getSpecialType(value){
-    const specialType = { money: false, like: false, percent: false, time: false };
+    const specialType = { money: false, like: false, percent: false, time: false, isIn: false, value:'' };
     
     if (value.indexOf("@money") > -1) {
       specialType.money = true;
@@ -273,8 +279,11 @@ export const dataConvert = {
       specialType.time = true;
       value = value.replace(/@time/g,'');
     }
-
-    return specialType;
+    if (value.indexOf("@in") > -1) {
+      specialType.isIn = true;
+      value = value.replace(/@in/g,'');
+    }
+    return { specialFiled: specialType, value: value.trim() };
   },
   getDataType(value) {
     if (value.indexOf(dataType.java.String) > -1 || value.indexOf(dataType.java.String.toLocaleLowerCase()) > -1) {

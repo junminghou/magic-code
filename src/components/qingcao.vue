@@ -35,7 +35,7 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-      
+     
 
     </div>
 
@@ -82,9 +82,48 @@
             }
           </div>
         </div>
-
         
-        <div class="publicClassQuery">
+        <div class="publicClassQuery2" style="margin-left: 15px;">
+          @Data<br>
+          @Builder<br>
+          @AllArgsConstructor<br>
+          @NoArgsConstructor<br>   
+          public class {{table.pascalName}}Query {
+          <br/>
+          <template v-for="column in clickedFields">
+        
+            <template v-if="column.specialType.like">
+              {{showTab(2)}} /** <br>
+              {{showTab(2)}} &nbsp; * {{column.description}}<br>
+              {{showTab(2)}} &nbsp; */<br>
+              {{showTab(2)}} private {{column.dataType}} like{{column.pascalName}};
+              <br>
+            </template>
+            <template v-else-if="column.specialType.time">
+              {{showTab(2)}} /** <br>
+              {{showTab(2)}} &nbsp; * {{column.description}}<br>
+              {{showTab(2)}} &nbsp; */<br>
+              {{showTab(2)}} private {{column.dataType}} {{column.camelName}}Begin;          
+              <br>              
+              {{showTab(2)}} /** <br>
+              {{showTab(2)}} &nbsp; * {{column.description}}<br>
+              {{showTab(2)}} &nbsp; */<br>
+              {{showTab(2)}} private {{column.dataType}} {{column.camelName}}End;
+              </br>
+            </template>
+            <template v-else>
+            {{showTab(2)}} /** <br>
+            {{showTab(2)}} &nbsp; * {{column.description}}<br>
+            {{showTab(2)}} &nbsp; */<br>
+            <!-- {{showTab(2)}} @ExcelProperty(value = "{{column.description}}", index = {{index}}) <br> -->
+            {{showTab(2)}}<span> private {{column.dataType}} {{column.camelName}};</span>
+             </br>
+            </template>
+          </template>
+          }
+        </div>
+
+        <div class="publicClassQuery" style="margin-left: 15px;">
           @Data<br>
           @Builder<br>
           @AllArgsConstructor<br>
@@ -124,29 +163,36 @@
             @Override<br/>
             public List{{_(table.pascalName+"BO")}} findList(
               <template v-for="(column,index) in clickedFields">
-                {{column.dataType}} {{column.camelName}}
+               <template v-if="column.specialType.isIn">
+               List{{_(column.dataType)}} {{column.camelName}}List
+               </template>
+               <template v-else>
+                 {{column.dataType}} {{column.camelName}}
+               </template>                              
                 <template v-if="index !== (clickedFields.length-1)">,</template>
               </template>) {<br/>
               
-              <template v-for="column in clickedFields">
-
-                <template v-if="column.dataType == 'Long'">
-                  {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
-                  {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
-                  {{showTab(2)}}} <br/>
-                </template>
-                
-                <template v-if="column.dataType == 'Integer'">
-                  {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
-                  {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
-                  {{showTab(2)}}} <br/>
-                </template>
-                
-                  <template v-if="column.dataType == 'String'">
-                    {{showTab(2)}}if (StringUtils.isBlank({{column.camelName}})) { <br/>
-                    {{showTab(2)}}{{showTab(2)}}return Collections.emptyList();<br/>
-                    {{showTab(2)}}}<br/>
-                </template>
+                <template v-for="column in clickedFields">
+                  <template v-if="column.specialType.isIn">
+                    {{showTab(2)}}if (CollectionUtils.isEmpty({{column.camelName}}List)) { <br/>
+                    {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
+                    {{showTab(2)}}} <br/>
+                  </template>    
+                  <template v-else-if="column.dataType == 'Long'">
+                    {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0L)) { <br/>
+                    {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
+                    {{showTab(2)}}} <br/>
+                  </template>
+                  <template v-else-if="column.dataType == 'Integer'">
+                    {{showTab(2)}}if ({{column.camelName}} == null || {{column.camelName}}.equals(0)) { <br/>
+                    {{showTab(2)}}{{showTab(2)}}return Collections.emptyList(); <br/>
+                    {{showTab(2)}}} <br/>
+                  </template>
+                    <template v-if="column.dataType == 'String'">
+                      {{showTab(2)}}if (StringUtils.isBlank({{column.camelName}})) { <br/>
+                      {{showTab(2)}}{{showTab(2)}}return Collections.emptyList();<br/>
+                      {{showTab(2)}}}<br/>
+                  </template>
               </template>
             <br/>
 
@@ -154,7 +200,12 @@
                 {{showTab(2)}}example.createCriteria()<br/>
                 <template v-for="(column,index) in whereFields">
                   <div>
+                    <template v-if="column.specialType.isIn">
+                    {{showTab(2)}}{{showTab(2)}}.andIn("{{column.camelName}}", {{column.camelName}}List)
+                    </template>
+                    <template v-else>
                     {{showTab(2)}}{{showTab(2)}}.andEqualTo("{{column.camelName}}", {{column.camelName}})
+                    </template>
                     <template v-if="index === (whereFields.length-1)">;</template>
                   </div>
                 </template>          
@@ -203,28 +254,48 @@
         <br/>
         <template>
           @Override<br/>
-          private Example getFilter({{table.pascalName}}SearchBO option) { <br/>
+          private Example getFilter({{table.pascalName}}Query option) { <br/>
             {{showTab(2)}}Example example = new Example({{table.pascalName}}PO.class); <br/>
             {{showTab(2)}}Example.Criteria criteria = example.createCriteria(); <br/><br/>
 
-            <template v-for="(column,index) in whereFields">         
-              <template v-if="column.dataType == 'Integer'">
+            <template v-for="(column,index) in whereFields">  
+              <template v-if="column.specialType.isIn">
+                  {{showTab(2)}}if (CollectionUtils.isNotEmpty(option.get{{column.pascalName}}List())) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}criteria.andIn("{{column.camelName}}", option.get{{column.pascalName}}List()); <br/>
+                  {{showTab(2)}}} <br/>
+              </template>       
+              <template v-else-if="column.specialType.time">
+                  {{showTab(2)}}if (Optional.ofNullable(option.get{{column.pascalName}}Begin()).orElse(0) > 0) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}criteria.andGreaterThanOrEqualTo("{{column.camelName}}", option.get{{column.pascalName}}Begin()); <br/>
+                  {{showTab(2)}}} <br/>
+
+                  {{showTab(2)}}if (Optional.ofNullable(option.get{{column.pascalName}}End()).orElse(0) > 0) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}criteria.andLessThan("{{column.camelName}}", option.get{{column.pascalName}}End()); <br/>
+                  {{showTab(2)}}} <br/>
+              </template>
+              <template v-else-if="column.specialType.like">
+                  {{showTab(2)}}if (StringUtils.isNotBlank(option.getLike{{column.pascalName}}())) { <br/>
+                  {{showTab(2)}}{{showTab(2)}}criteria.andLike("{{column.camelName}}", option.getLike{{column.pascalName}}()); <br/>
+                  {{showTab(2)}}} <br/>
+              </template>
+                <template v-else-if="column.dataType == 'Integer'">
                   {{showTab(2)}}if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0) > 0) { <br/>
-                  {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+                  {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()); <br/>
                   {{showTab(2)}}} <br/>
                 </template>
 
-                <template v-if="column.dataType == 'Long'">
+                <template v-else-if="column.dataType == 'Long'">
                   {{showTab(2)}}if (Optional.ofNullable(option.get{{column.pascalName}}()).orElse(0L) > 0L) { <br/>
-                  {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+                  {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()); <br/>
                   {{showTab(2)}}} <br/>
                 </template>
 
-                <template v-if="column.dataType == 'String'">
+                <template v-else-if="column.dataType == 'String'">
                     {{showTab(2)}}if (StringUtils.isNotBlank(option.get{{column.pascalName}})) { <br/>
-                    {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()) <br/>
+                    {{showTab(2)}}{{showTab(2)}}criteria.andEqualTo("{{column.camelName}}", option.get{{column.pascalName}}()); <br/>
                     {{showTab(2)}}}<br/>
                 </template>
+
             </template>
             <br/>
             {{showTab(2)}}String orderStr = ""; <br/>
