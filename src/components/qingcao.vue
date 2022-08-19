@@ -35,7 +35,7 @@
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-     
+
 
     </div>
 
@@ -415,11 +415,22 @@
             @Override<br/>
             public {{table.primaryKeyType}} add({{table.pascalName}}BO entityBO) {<br/>
                 {{showTab(2)}}if (entityBO == null) {<br/>
-                    {{showTab(2)}}{{showTab(2)}}return 0;<br/>
+                    {{showTab(2)}}{{showTab(2)}}return 0{{_L(table)}};<br/>
                 {{showTab(2)}}}<br/>
                 {{showTab(2)}}{{table.pascalName}}PO entityPO = BeanConverter.copy(entityBO, {{table.pascalName}}PO.class);<br/>
-                {{showTab(2)}}mapper.insertSelective(entityPO);<br/>
-                {{showTab(2)}}return entityPO.getId();<br/>
+                {{showTab(2)}}try {<br/>
+                {{showTab(2)}}{{showTab(2)}}int ret = mapper.insertSelective(entityPO);<br/>
+                {{showTab(2)}}{{showTab(2)}}if (ret &lt;= 0) {<br/>
+                {{showTab(2)}}{{showTab(2)}}{{showTab(2)}}return 0{{_L(table)}};<br/>
+                {{showTab(2)}}{{showTab(2)}}}<br/>
+                {{showTab(2)}}{{showTab(2)}}return entityPO.getId();<br/>                
+                {{showTab(2)}}} catch (DuplicateKeyException exception) {<br/>
+                {{showTab(2)}}{{showTab(2)}}log.warn("[{{table.description}}]插入时出现重复的Key, info: {}", entityBO);<br/>
+                {{showTab(2)}}{{showTab(2)}}return 0{{_L(table)}};<br/>
+                {{showTab(2)}}} catch (Exception exception) {<br/>
+                {{showTab(2)}}{{showTab(2)}}log.error("[{{table.description}}]插入表时异常, msg: {}", exception.getMessage(), exception);<br/>
+                {{showTab(2)}}{{showTab(2)}}return 0{{_L(table)}};<br/>
+                {{showTab(2)}}}<br/>
             }<br/>
             </template>
             <br/>
@@ -887,6 +898,12 @@ import { fail } from 'assert';
             result += "\u00a0\u00a0\u00a0";
           }
           return result + '\u00a0';
+      },
+      _L(table) {
+        if(table.primaryKeyType == 'Long') {
+          return 'L';
+        }
+        return '';
       },
       pushField(field, pushType) {
           let contains = false;
