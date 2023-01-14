@@ -36,8 +36,9 @@ export const dataConvert = {
       let field = {};
       field.type = fields[0];
       field.name = fields[1];
+      let paramPascalName = me.getPascalNameForJava(field.name);
       let paramDefinition = me.getJavaInParamType(field.type);
-      methodInParams.push({ paramType: field.type, paramName: field.name, paramDefinition });
+      methodInParams.push({ paramType: field.type, paramName: field.name, paramPascalName, paramDefinition });
     });
 
 
@@ -58,7 +59,7 @@ export const dataConvert = {
       return tables;
     }
 
-    let sourceStr = divContent.replace('\n', '');
+    let sourceStr = divContent.replace('\n', '').replace('implements Serializable','');
     sourceStr.split('}').forEach(inner => {
       if (inner.trim() == '') {
         return;
@@ -89,7 +90,7 @@ export const dataConvert = {
       arrayColumns.forEach(function (value) {
         if (value === "") return;
 
-        if (value.indexOf(constraint) > -1) {
+        if (value.indexOf(constraint) > -1 || value.indexOf('serialVersionUID') > -1) {
           return;
         }
         let column = {};
@@ -153,7 +154,7 @@ export const dataConvert = {
       if (divContent.trim() == '') {
         return;
       }
-      let inner = divContent.replace('\n', '');
+      let inner = divContent.replaceAll('\n', '').replaceAll('`','');
       let tableName = "";
       if (inner.indexOf(create) > -1) {
         tableName = dataConvert.getDuringStr(inner, create, "(");
@@ -307,12 +308,16 @@ export const dataConvert = {
     return "String";
   },
   getJavaType(value) {
-    let methodOutType = { isBaseType: true, isReferenceType: false, isList: false, outTypeValue: '' };
+    let methodOutType = { isBaseType: true, isReferenceType: false, isListOrMap: false, isList: false, isMap: false, outTypeValue: '', outTypeCamelValue: 'list' };
 
-    if (value.indexOf("List<") > -1) {
+    if (value.indexOf("List<") > -1 || value.indexOf("Map<") > -1) {
       methodOutType.isReferenceType = true;
       methodOutType.isList = true;
       methodOutType.isBaseType = false;
+      methodOutType.isListOrMap = true;
+      if(value.indexOf("Map<") > -1) {
+        methodOutType.isMap = true;
+      }     
     }
 
     let hasBaseType = false;
@@ -339,6 +344,10 @@ export const dataConvert = {
 
     if (!hasBaseType) {
       methodOutType.outTypeValue = this.getDuringStr(value, "<", ">");
+      methodOutType.outTypeCamelValue = this.clearBOPODTOData(this.getCamelName(methodOutType.outTypeValue));
+      if(methodOutType.isList && methodOutType.outTypeCamelValue.toLowerCase().indexOf('list') === -1) {
+        methodOutType.outTypeCamelValue = methodOutType.outTypeCamelValue + "List"; 
+      }
     }
     methodOutType.outTypeSource = value;
     return methodOutType;
@@ -379,6 +388,9 @@ export const dataConvert = {
     }
 
     return source.substring(beginIndex + beginLength, endIndex).trim();
+  }, 
+  clearBOPODTOData(value) {
+    return value.replace('BO','').replace('PO','').replace('DTO','');
   }
 };
 

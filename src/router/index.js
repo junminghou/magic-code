@@ -6,6 +6,7 @@ import memory from '@/components/memory'
 import xman from '@/components/xman'
 import qingcao from '@/components/qingcao'
 import method from '@/components/method'
+import field_check from '@/components/field_check'
 
 Vue.use(Router)
 

@@ -31,11 +31,80 @@
     </div> -->
 
     <div id="create_class_script" ref="create_class_script" style="display: none;">
+      public class Order {
+        /**
+          *
+          */
+        private Integer id;
+        /**
+          * 名称
+          */
+        private String name;
+        /**
+          * 订单库存
+          */
+        private Integer stock;
+        /**
+          * 创建时间
+          */
+        private String orderNo;
+        /**
+          * 更新时间
+          */
+        private Integer description;
+    };
+    public class User {
+        /**
+          *
+          */
+        private Integer id;
+        /**
+          * 名称
+          */
+        private @like String name  ;
+        /**
+          * 年龄
+          */
+        private Integer age;
+        /**
+          * 身高
+          */
+        private String heigh;
+        /**
+          * 描述
+          */
+        private Integer description;
+    };
+    public class ChargeResultVO {
 
+private static final long serialVersionUID = -5483541541904867130L;
+
+/**
+ * 标题
+ */
+private String title;
+
+/**
+ * 副标题
+ */
+private String subTitle;
+
+/**
+ * 是否成功 1:成功；2：失败
+ */
+private Integer isSuccess;
+}
     </div>
 
     <div id="create_table_script" ref="create_table_script">
-
+      CREATE TABLE `order_stock` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL comment '名称' @like,
+  `stock` int(10) unsigned DEFAULT NULL comment '订单库存',
+  `creator_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP comment '创建时间',
+  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment '更新时间',
+  PRIMARY KEY (`id`)
+) comment '订单库存'
 
     </div>
 
